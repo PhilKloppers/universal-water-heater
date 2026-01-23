@@ -29,7 +29,7 @@ custom_components/universal_water_heater/
 ├── config_flow_handler/     # Config flow implementation
 │   ├── __init__.py          # Package exports
 │   ├── handler.py           # Backward compatibility wrapper
-│   ├── config_flow.py       # Main config flow (user, reauth, reconfigure)
+│   ├── config_flow.py       # Main config flow (user, reconfigure)
 │   ├── options_flow.py      # Options flow
 │   ├── subentry_flow.py     # Subentry flow template
 │   ├── schemas/             # Voluptuous schemas
@@ -38,15 +38,13 @@ custom_components/universal_water_heater/
 │   │   └── options.py       # Options flow schemas
 │   └── validators/          # Input validation
 │       ├── __init__.py      # Validator exports
-│       ├── credentials.py   # Credential validation
-│       └── sanitizers.py    # Input sanitizers
+│       └── device_name.py   # Device name validation
 ├── entity_utils/            # Entity helper utilities
 │   ├── __init__.py
 │   ├── device_info.py       # Device information helpers
 │   └── state_helpers.py     # State management utilities
 ├── service_actions/         # Service action implementations
-│   ├── __init__.py
-│   └── example_service.py   # Example service action handler
+│   └── __init__.py          # Service action setup
 ├── translations/            # Localization files
 │   └── en.json              # English translations
 └── <platform>/              # Platform-specific implementations
@@ -72,7 +70,7 @@ updates to all entities. It is organized as a package with separate modules for 
 
 **Core functionality:**
 
-- Configurable update interval (default: 5 minutes)
+- Fixed update interval (1 hour)
 - Error handling with exponential backoff
 - Shared data access for all entities
 - Automatic retry on transient failures
@@ -98,7 +96,6 @@ Handles all communication with external APIs or devices. Implements:
 
 - Async HTTP requests using `aiohttp`
 - Connection management and timeouts
-- Authentication handling
 - Error translation to custom exceptions
 
 **Key class:** `UniversalWaterHeaterApiClient`
@@ -112,7 +109,7 @@ is organized modularly to support complex flows without becoming monolithic.
 
 **Structure:**
 
-- `config_flow.py`: Main flow (user setup, reauth, reconfigure)
+- `config_flow.py`: Main flow (user setup, reconfigure)
 - `options_flow.py`: Options flow for post-setup configuration
 - `schemas/`: Voluptuous schemas for all forms
 - `validators/`: Validation logic separated from flow logic
@@ -120,9 +117,8 @@ is organized modularly to support complex flows without becoming monolithic.
 
 **Supported flows:**
 
-- Initial user setup with validation
+- Initial user setup with validation and entity configuration
 - Options flow for reconfiguration
-- Reauthentication flow for expired credentials
 - Ready for subentry flows (multi-device support)
 
 **Key classes:**

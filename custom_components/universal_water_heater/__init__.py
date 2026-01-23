@@ -2,7 +2,7 @@
 Custom integration to integrate universal_water_heater with Home Assistant.
 
 This integration demonstrates best practices for:
-- Config flow setup (user, reconfigure, reauth)
+- Config flow setup (user, reconfigure)
 - DataUpdateCoordinator pattern for efficient data fetching
 - Multiple platform types (sensor, binary_sensor, switch, select, number)
 - Service registration and handling

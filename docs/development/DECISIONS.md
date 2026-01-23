@@ -35,7 +35,7 @@ Each decision is documented with:
 **Consequences:**
 
 - All entities must inherit from `CoordinatorEntity`
-- Single update interval applies to all entities
+- Fixed update interval (1 hour) applies to all entities
 - Data is fetched even if no entities are enabled
 - Coordinator manages entity lifecycle and availability
 

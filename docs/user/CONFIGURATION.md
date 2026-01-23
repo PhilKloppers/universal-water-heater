@@ -8,23 +8,21 @@ This document describes all configuration options and settings available in the 
 
 These options are configured during initial setup via the Home Assistant UI.
 
-#### Connection Settings
+#### Device Settings
 
 | Option | Type | Required | Default | Description |
 |--------|------|----------|---------|-------------|
-| **Host** | string | Yes | - | Hostname or IP address of the device/service |
-| **Port** | integer | No | 8080 | Connection port |
-| **API Key** | string | Yes* | - | Authentication key or token |
-| **Use SSL** | boolean | No | false | Enable HTTPS connection |
+| **Device Name** | string | Yes | - | Friendly name for the integration instance |
 
-*Required if the device/service requires authentication.
+#### Entity Source Configuration
 
-#### Update Settings
-
-| Option | Type | Required | Default | Description |
-|--------|------|----------|---------|-------------|
-| **Update Interval** | integer (seconds) | No | 300 | How often to poll for updates (minimum: 30 seconds) |
-| **Name** | string | No | "Device" | Friendly name for the integration instance |
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| **Water Temperature Source** | entity_id | No | Sensor entity providing temperature reading |
+| **Power Source** | entity_id | No | Sensor entity providing power consumption |
+| **Voltage Source** | entity_id | No | Sensor entity providing voltage |
+| **Current Source** | entity_id | No | Sensor entity providing current (amperage) |
+| **Heater Switch Source** | entity_id | No | Switch entity for the heater switch to mirror |
 
 ### Options Flow (Reconfiguration)
 
@@ -38,10 +36,13 @@ After initial setup, you can modify settings:
 
 **Available options:**
 
-- Update interval
-- Name/identifier
-- Connection timeout
-- Additional features (device-specific)
+- Enable debugging
+- Custom icon
+- Temperature entity source
+- Power entity source
+- Voltage entity source
+- Current entity source
+- Switch entity source
 
 ## Entity Configuration
 
@@ -87,44 +88,51 @@ Disabled entities won't update or consume resources.
 
 The integration provides the following services:
 
-### `universal_water_heater.example_service`
+### `universal_water_heater.set_target_temperature`
 
-Execute an example service action on the device.
+Set the target temperature for Normal mode.
 
-**Service data:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `entity_id` | string or list | No | Target entity/entities (if omitted, targets all) |
-| `parameter` | string | Yes | Service-specific parameter |
-| `value` | integer | No | Numeric value for the action |
+**Parameters:**
+- `temperature` (required): Temperature in °C (40-80, validated against maximum temperature)
 
 **Example:**
 
 ```yaml
-service: universal_water_heater.example_service
-target:
-  entity_id: switch.device_name_switch
+service: universal_water_heater.set_target_temperature
 data:
-  parameter: "setting_name"
-  value: 42
+  temperature: 65
+```
+
+### `universal_water_heater.set_eco_temperature`
+
+Set the target temperature for Eco mode.
+
+**Parameters:**
+- `temperature` (required): Temperature in °C (40-80, validated against maximum temperature and cannot exceed normal temperature)
+
+**Example:**
+
+```yaml
+service: universal_water_heater.set_eco_temperature
+data:
+  temperature: 55
 ```
 
 ### Using Services in Automations
 
 ```yaml
 automation:
-  - alias: "Call service at sunset"
+  - alias: "Set temperatures based on time"
     trigger:
-      - trigger: sun
-        event: sunset
+      - trigger: time
+        at: "06:00:00"
     action:
-      - action: universal_water_heater.example_service
-        target:
-          entity_id: switch.device_name_switch
+      - action: universal_water_heater.set_target_temperature
         data:
-          parameter: "mode"
-          value: 1
+          temperature: 65
+      - action: universal_water_heater.set_eco_temperature
+        data:
+          temperature: 50
 ```
 
 ## Advanced Configuration
@@ -140,14 +148,7 @@ You can add multiple instances of this integration for different devices:
 
 Each instance creates separate entities with unique entity IDs.
 
-### Network Configuration
-
-If the device is on a different network or behind a firewall:
-
-- Ensure ports are open (default: 8080)
-- Configure port forwarding if needed
-- Consider VPN for remote access
-- Some devices may require static IP addresses
+## Troubleshooting Configuration
 
 ### Polling Behavior
 

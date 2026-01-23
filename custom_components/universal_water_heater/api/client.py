@@ -2,7 +2,7 @@
 API Client for universal_water_heater.
 
 This module provides the API client for communicating with external services.
-It demonstrates proper error handling, authentication patterns, and async operations.
+It handles HTTP requests and error handling.
 
 For more information on creating API clients:
 https://developers.home-assistant.io/docs/api_lib_index
@@ -27,31 +27,19 @@ class UniversalWaterHeaterApiClientCommunicationError(
     """Exception to indicate a communication error with the API."""
 
 
-class UniversalWaterHeaterApiClientAuthenticationError(
-    UniversalWaterHeaterApiClientError,
-):
-    """Exception to indicate an authentication error with the API."""
-
-
 def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
     """
     Verify that the API response is valid.
 
-    Raises appropriate exceptions for authentication and HTTP errors.
+    Raises appropriate exceptions for HTTP errors.
 
     Args:
         response: The aiohttp ClientResponse to verify.
 
     Raises:
-        UniversalWaterHeaterApiClientAuthenticationError: For 401/403 errors.
-        aiohttp.ClientResponseError: For other HTTP errors.
+        aiohttp.ClientResponseError: For HTTP errors.
 
     """
-    if response.status in (401, 403):
-        msg = "Invalid credentials"
-        raise UniversalWaterHeaterApiClientAuthenticationError(
-            msg,
-        )
     response.raise_for_status()
 
 
@@ -92,10 +80,6 @@ class UniversalWaterHeaterApiClient:
         Get data from the API.
 
         This method fetches the current state and sensor data from the device.
-        It demonstrates where credentials would be used in production:
-        - Authorization headers (Basic Auth, Bearer Token)
-        - Query parameters (username, api_key)
-        - Session cookies (after login)
 
         Returns:
             A dictionary containing the device data.
@@ -123,12 +107,11 @@ class UniversalWaterHeaterApiClient:
             A dictionary containing the API response.
 
         Raises:
-            UniversalWaterHeaterApiClientAuthenticationError: If authentication fails.
             UniversalWaterHeaterApiClientCommunicationError: If communication fails.
             UniversalWaterHeaterApiClientError: For other API errors.
 
         """
-        # In production: Send authenticated request to change fan speed
+        # In production: Send request to change fan speed
         return await self._api_wrapper(
             method="patch",
             url="https://jsonplaceholder.typicode.com/posts/1",
@@ -147,12 +130,11 @@ class UniversalWaterHeaterApiClient:
             A dictionary containing the API response.
 
         Raises:
-            UniversalWaterHeaterApiClientAuthenticationError: If authentication fails.
             UniversalWaterHeaterApiClientCommunicationError: If communication fails.
             UniversalWaterHeaterApiClientError: For other API errors.
 
         """
-        # In production: Send authenticated request to change humidity setting
+        # In production: Send request to change humidity setting
         return await self._api_wrapper(
             method="patch",
             url="https://jsonplaceholder.typicode.com/posts/1",
@@ -183,7 +165,6 @@ class UniversalWaterHeaterApiClient:
             The JSON response from the API.
 
         Raises:
-            UniversalWaterHeaterApiClientAuthenticationError: If authentication fails.
             UniversalWaterHeaterApiClientCommunicationError: If communication fails.
             UniversalWaterHeaterApiClientError: For other API errors.
 

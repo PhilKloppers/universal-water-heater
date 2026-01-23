@@ -4,7 +4,6 @@ Config flow for universal_water_heater.
 This module implements the main configuration flow including:
 - Initial user setup
 - Reconfiguration of existing entries
-- Reauthentication flow
 
 For more information:
 https://developers.home-assistant.io/docs/config_entries_config_flow_handler
@@ -18,7 +17,6 @@ from slugify import slugify
 
 from custom_components.universal_water_heater.config_flow_handler.schemas import (
     get_options_schema,
-    get_reauth_schema,
     get_reconfigure_schema,
     get_user_schema,
 )
@@ -43,12 +41,11 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
     Handle a config flow for universal_water_heater.
 
     This class manages the configuration flow for the integration, including
-    initial setup, reconfiguration, and reauthentication.
+    initial setup and reconfiguration.
 
     Supported flows:
     - user: Initial setup via UI
     - reconfigure: Update existing configuration
-    - reauth: Handle expired credentials
 
     For more details:
     https://developers.home-assistant.io/docs/config_entries_config_flow_handler
@@ -184,64 +181,6 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
             step_id="configure_entities",
             data_schema=get_options_schema(),
             description_placeholders={"device_name": self.device_name},
-        )
-
-    async def async_step_reauth(
-        self,
-        entry_data: dict[str, Any] | None = None,
-    ) -> config_entries.ConfigFlowResult:
-        """
-        Handle reauthentication when credentials are invalid.
-
-        This flow is automatically triggered when the coordinator catches
-        an authentication error (ConfigEntryAuthFailed).
-
-        Args:
-            entry_data: The existing entry data (unused, per convention).
-
-        Returns:
-            The result of the reauth_confirm step.
-
-        """
-        return await self.async_step_reauth_confirm()
-
-    async def async_step_reauth_confirm(
-        self,
-        user_input: dict[str, Any] | None = None,
-    ) -> config_entries.ConfigFlowResult:
-        """
-        Handle reauthentication confirmation.
-
-        Shows the reauthentication form and processes updated credentials.
-
-        Args:
-            user_input: The user input with updated credentials, or None for initial display.
-
-        Returns:
-            The config flow result, either showing a form or updating the entry.
-
-        """
-        entry = self._get_reauth_entry()
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            try:
-                await validate_device_name(
-                    self.hass,
-                    device_name=user_input[CONF_NAME],
-                )
-            except Exception as exception:  # noqa: BLE001
-                errors["base"] = self._map_exception_to_error(exception)
-            else:
-                return self.async_update_reload_and_abort(
-                    entry,
-                    data={**entry.data, **user_input},
-                )
-
-        return self.async_show_form(
-            step_id="reauth_confirm",
-            data_schema=get_reauth_schema(),
-            errors=errors,
         )
 
     def _map_exception_to_error(self, exception: Exception) -> str:

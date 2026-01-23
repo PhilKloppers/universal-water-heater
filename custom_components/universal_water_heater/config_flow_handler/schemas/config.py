@@ -4,11 +4,9 @@ Config flow schemas.
 Schemas for the main configuration flow steps:
 - User setup
 - Reconfiguration
-- Reauthentication
 
 When this file grows too large (>300 lines), consider splitting into:
 - user.py: User setup schemas
-- reauth.py: Reauthentication schemas
 - reconfigure.py: Reconfiguration schemas
 """
 
@@ -74,29 +72,7 @@ def get_reconfigure_schema(name: str) -> vol.Schema:
     )
 
 
-def get_reauth_schema() -> vol.Schema:
-    """
-    Get schema for reauthentication step.
-
-    Returns:
-        Voluptuous schema for reauthentication.
-
-    """
-    return vol.Schema(
-        {
-            vol.Required(
-                CONF_NAME,
-            ): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    type=selector.TextSelectorType.TEXT,
-                ),
-            ),
-        },
-    )
-
-
 __all__ = [
-    "get_reauth_schema",
     "get_reconfigure_schema",
     "get_user_schema",
 ]

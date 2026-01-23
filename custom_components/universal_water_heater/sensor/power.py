@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from custom_components.universal_water_heater.entity import UniversalWaterHeaterEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription, SensorStateClass
 from homeassistant.const import UnitOfPower
+from homeassistant.core import callback
 
 if TYPE_CHECKING:
     from custom_components.universal_water_heater.coordinator import UniversalWaterHeaterDataUpdateCoordinator
@@ -36,6 +37,7 @@ class UniversalWaterHeaterPowerSensor(SensorEntity, UniversalWaterHeaterEntity):
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator, entity_description)
+        self._unsub_state_updates: list = []
 
     @property
     def native_value(self) -> float | None:
@@ -70,3 +72,34 @@ class UniversalWaterHeaterPowerSensor(SensorEntity, UniversalWaterHeaterEntity):
 
         source_state = self.hass.states.get(source_entity_id)
         return source_state is not None and source_state.state not in ("unknown", "unavailable")
+
+    async def async_added_to_hass(self) -> None:
+        """Handle entity added to hass."""
+        await super().async_added_to_hass()
+        self._setup_state_listener()
+        self.async_on_remove(self._cleanup_state_listeners)
+
+    def _setup_state_listener(self) -> None:
+        """Set up the state change listener for the source entity."""
+        source_entity_id = self.coordinator.config_entry.options.get("power_source_entity_id")
+        if not source_entity_id:
+            return
+
+        unsub = self.hass.bus.async_listen(
+            "state_changed",
+            self._on_source_state_changed,
+        )
+        self._unsub_state_updates.append(unsub)
+
+    @callback
+    def _on_source_state_changed(self, event) -> None:
+        """Handle source entity state changes."""
+        source_entity_id = self.coordinator.config_entry.options.get("power_source_entity_id")
+        if event.data.get("entity_id") == source_entity_id:
+            self.async_write_ha_state()
+
+    def _cleanup_state_listeners(self) -> None:
+        """Clean up state change listeners."""
+        for unsub in self._unsub_state_updates:
+            unsub()
+        self._unsub_state_updates.clear()

@@ -21,32 +21,30 @@ Uncomment and customize these badges if you want to use them:
 ## ✨ Features
 
 - **Easy Setup**: Simple configuration through the UI - no YAML required
-- **Air Quality Monitoring**: Track AQI and PM2.5 levels in real-time
-- **Filter Management**: Monitor filter life and get replacement alerts
-- **Smart Control**: Adjust fan speed, target humidity, and operating modes
-- **Child Lock**: Safety feature to prevent accidental changes
-- **Diagnostic Info**: View filter life, runtime hours, and device statistics
-- **Reconfigurable**: Change credentials anytime without removing the integration
-- **Options Flow**: Adjust settings like update interval after setup
-- **Custom Services**: Advanced control with built-in service calls
+- **Temperature Control**: Monitor water temperature with configurable target and eco modes
+- **Power Monitoring**: Track power consumption, voltage, and current in real-time
+- **Smart Modes**: Select between Normal, Optimised, Eco, or Off operating modes
+- **Thermostat Control**: Configure temperature settings with hysteresis for precise control
+- **Linked Switch**: Mirror and control an external switch entity
+- **Options Flow**: Adjust settings like entity sources and debug logging after setup
+- **Real-time Updates**: Linked entities update instantly when source entities change
 
 **This integration will set up the following platforms.**
 
 Platform | Description
 -- | --
-`sensor` | Air quality index (AQI), PM2.5, filter life, and runtime
-`binary_sensor` | API connection status and filter replacement alert
-`switch` | Child lock and LED display controls
-`select` | Fan speed selection (Low/Medium/High/Auto)
-`number` | Target humidity setting (30-80%)
-`button` | Reset filter timer after replacement
-`fan` | Air purifier fan control with speed settings
+`sensor` | Water temperature, power, voltage, and current (linked to external entities)
+`binary_sensor` | API connectivity status
+`switch` | Heater switch (linked to external switch entity)
+`select` | Operating mode selection (Normal, Optimised, Eco, Off)
+`number` | Temperature control (normal, eco, maximum) and hysteresis settings
 
-> **💡 Interactive Demo**: The entities are interconnected for demonstration:
+> **💡 Interactive Demo**: The linked sensor and switch entities demonstrate real-time synchronization:
 >
-> - Press the **Reset Filter Timer** button → **Filter Life Remaining** sensor updates to 100%
-> - Change the **Air Purifier** fan speed → **Fan Speed** select syncs automatically
-> - Change the **Fan Speed** select → **Air Purifier** fan syncs automatically
+> - **Linked Sensors** mirror temperature, power, voltage, and current from other entities
+> - **Heater Switch** reflects the state of an external switch entity
+> - Changes to source entities update the linked entities instantly
+> - Toggling the heater switch updates the source entity bidirectionally
 
 ## 🚀 Quick Start
 
@@ -88,11 +86,11 @@ Click the button below to open the configuration dialog:
 
 Follow the setup wizard:
 
-1. Enter your username
-2. Enter your password
+1. Enter your device name
+2. Configure entity sources in the next step
 3. Click Submit
 
-That's it! The integration will start loading your data.
+That's it! The integration will start monitoring your device.
 
 #### Option 2: Manual Configuration
 
@@ -101,29 +99,31 @@ That's it! The integration will start loading your data.
 3. Search for "Universal Water Heater"
 4. Follow the same setup steps as Option 1
 
-### Step 3: Adjust Settings (Optional)
+### Step 3: Configure Entity Sources (Optional)
 
-After setup, you can adjust options:
+After setup, you can specify which entities this integration should track:
 
 1. Go to **Settings** → **Devices & Services**
 2. Find **Universal Water Heater**
-3. Click **Configure** to adjust:
-   - Update interval (how often to refresh data)
+3. Click **Configure** to set:
+   - Water Temperature entity source
+   - Power Consumption entity source
+   - Voltage entity source
+   - Current entity source
+   - Heater Switch source entity
    - Enable debug logging
 
-You can also **Reconfigure** your credentials anytime without removing the integration.
+You can also **Reconfigure** your device anytime without removing the integration.
 
 ### Step 4: Start Using!
 
-The integration creates several entities for your air purifier:
+The integration creates several entities for monitoring and control:
 
-- **Sensors**: Air quality index, PM2.5 levels, filter life remaining, total runtime
-- **Binary Sensors**: API connection status, filter replacement alert
-- **Switches**: Child lock, LED display control
-- **Select**: Fan speed (Low/Medium/High/Auto)
-- **Number**: Target humidity (30-80%)
-- **Button**: Reset filter timer
-- **Fan**: Air purifier fan control
+- **Sensors**: Water temperature, power consumption, voltage, current (all linked to external entities)
+- **Switch**: Heater Switch (linked to external switch entity)
+- **Select**: Operating Mode (Normal, Optimised, Eco, Off)
+- **Numbers**: Target Temperature (Normal), Temperature (Eco), Maximum Temperature, Hysteresis
+- **Binary Sensor**: API Connectivity status
 
 Find all entities in **Settings** → **Devices & Services** → **Universal Water Heater** → click on the device.
 
@@ -131,83 +131,82 @@ Find all entities in **Settings** → **Devices & Services** → **Universal Wat
 
 ### Sensors
 
-- **Air Quality Index (AQI)**: Real-time air quality measurement (0-500 scale)
-  - Includes air quality category (Good/Moderate/Unhealthy/etc.)
-  - Health recommendations based on current AQI
-- **PM2.5**: Fine particulate matter concentration in µg/m³
-- **Filter Life Remaining** (Diagnostic): Shows remaining filter life as percentage
-- **Total Runtime** (Diagnostic): Total operating hours of the device
+- **Water Temperature**: Current water temperature reading (linked entity)
+- **Power**: Power consumption in watts (linked entity)
+- **Voltage**: Electrical voltage reading (linked entity)
+- **Current**: Electrical current (amperage) reading (linked entity)
+
+All sensor values are synchronized in real-time from their source entities.
 
 ### Binary Sensors
 
-- **API Connection**: Shows whether the connection to the API is active
-  - On: Connected and receiving data
-  - Off: Connection lost or authentication failed
-  - Shows update interval and API endpoint information
-- **Filter Replacement Needed**: Alerts when filter needs replacement
-  - Shows estimated days remaining
-  - Turns on when filter life is low
+- **API Connectivity**: Shows connection status to the integration's data source
+  - On: Connected and operational
+  - Off: Disconnected or unavailable
 
 ### Switches
 
-- **Child Lock**: Prevents accidental button presses on the device
-  - Icon changes based on state (locked/unlocked)
-- **LED Display**: Enable/disable the LED display
-  - Disabled by default - enable in entity settings if needed
+- **Heater Switch**: Controls and mirrors an external switch entity
+  - Bidirectionally synced with source entity
+  - Updates reflect immediately
 
 ### Select
 
-- **Fan Speed**: Choose from Low, Medium, High, or Auto
-  - Icon changes dynamically based on selected speed
-  - Auto mode adjusts speed based on air quality
-  - Syncs bidirectionally with the Air Purifier fan entity
+- **Mode**: Operating mode selection
+  - **Normal**: Standard heating mode
+  - **Optimised**: Balanced operation
+  - **Eco**: Energy-saving mode
+  - **Off**: Heater off
 
-### Number
+### Numbers
 
-- **Target Humidity**: Set desired humidity level (30-80%)
-  - Adjustable in 5% increments
-  - Displayed as a slider in the UI
-
-### Button
-
-- **Reset Filter Timer**: Reset the filter life to 100%
-  - Press to reset after replacing the filter
-  - Instantly updates the Filter Life Remaining sensor
-
-### Fan
-
-- **Air Purifier**: Control the air purifier fan speed and power
-  - Three speed levels: Low, Medium, High
-  - Syncs bidirectionally with the Fan Speed select entity
-  - Turn on/off functionality
+- **Temperature (Normal)**: Set target temperature for Normal mode
+  - Range: 40°C - 80°C (step: 1°C)
+  - Default: 65°C
+- **Temperature (Eco)**: Set target temperature for Eco mode
+  - Range: 40°C - 80°C (step: 1°C)
+  - Default: 55°C
+  - Constraint: Cannot exceed Temperature (Normal) value
+- **Temperature (Max)**: Set maximum temperature limit
+  - Range: 50°C - 85°C (step: 1°C)
+  - Default: 75°C
+- **Hysteresis**: Thermostat hysteresis to prevent oscillation
+  - Range: 0.1°C - 5°C (step: 1°C)
+  - Default: 4°C
 
 ## Custom Services
 
-The integration provides services for advanced automation:
+The integration provides services for automation and control:
 
-### `universal_water_heater.example_action`
+### `universal_water_heater.set_target_temperature`
 
-Perform a custom action (customize this for your needs).
+Set the target temperature for Normal mode.
+
+**Parameters:**
+- `temperature` (required): Temperature in °C (40-80, validated against max temperature)
 
 **Example:**
 
 ```yaml
-service: universal_water_heater.example_action
+service: universal_water_heater.set_target_temperature
 data:
-  # Add your parameters here
+  temperature: 65
 ```
 
-### `universal_water_heater.reload_data`
+### `universal_water_heater.set_eco_temperature`
 
-Manually refresh data from the API without waiting for the update interval.
+Set the target temperature for Eco mode.
+
+**Parameters:**
+- `temperature` (required): Temperature in °C (40-80, validated against max temperature and cannot exceed normal temperature)
 
 **Example:**
 
 ```yaml
-service: universal_water_heater.reload_data
+service: universal_water_heater.set_eco_temperature
+data:
+  temperature: 55
 ```
-
-Use these services in automations or scripts for more control.
 
 ## Configuration Options
 
@@ -215,8 +214,7 @@ Use these services in automations or scripts for more control.
 
 Name | Required | Description
 -- | -- | --
-Username | Yes | Your account username
-Password | Yes | Your account password
+Device Name | Yes | A friendly name for your device
 
 ### After Setup (Options)
 
@@ -224,30 +222,23 @@ You can change these anytime by clicking **Configure**:
 
 Name | Default | Description
 -- | -- | --
-Update Interval | 1 hour | How often to refresh data
+Custom Icon | (empty) | Optional custom icon for the device
 Enable Debugging | Off | Enable extra debug logging
+Water Temperature Entity | (optional) | Entity to track water temperature
+Power Entity | (optional) | Entity to track power consumption
+Voltage Entity | (optional) | Entity to track voltage
+Current Entity | (optional) | Entity to track electrical current
+Heater Switch Source | (optional) | Entity for the heater switch to mirror
 
 ## Troubleshooting
 
-### Authentication Issues
+### Connection Issues
 
-#### Reauthentication
+If the integration fails to load:
 
-If your credentials expire or change, Home Assistant will automatically prompt you to reauthenticate:
-
-1. Go to **Settings** → **Devices & Services**
-2. Look for **"Action Required"** or **"Configuration Required"** message on the integration
-3. Click **"Reconfigure"** or follow the prompt
-4. Enter your updated credentials
-5. Click Submit
-
-The integration will automatically resume normal operation with the new credentials.
-
-#### Manual Credential Update
-
-You can also update credentials at any time without waiting for an error:
-
-1. Go to **Settings** → **Devices & Services**
+1. Check that your device name is entered correctly
+2. Verify any entity sources you've configured still exist
+3. Go to **Settings** → **Devices & Services** and click **Reconfigure**
 2. Find **Universal Water Heater**
 3. Click the **3 dots menu** → **Reconfigure**
 4. Enter new username/password
@@ -276,23 +267,22 @@ logger:
 
 ### Common Issues
 
-#### Authentication Errors
+#### Entity Source Issues
 
-If you receive authentication errors:
+If your entity sources are not working:
 
-1. Verify your username and password are correct
-2. Check that your account has the necessary permissions
-3. Wait for the automatic reauthentication prompt, or manually reconfigure
-4. Check the API Connection binary sensor for status
+1. Verify the entity ID exists in Home Assistant
+2. Check that the entity is available and not unavailable
+3. Go to **Settings** → **Devices & Services** → **Reconfigure** to update entity sources
+4. Check the integration logs for error messages
 
-#### Device Not Responding
+#### Missing Entities
 
-If your device is not responding:
+If expected entities are not showing:
 
-1. Check the **API Connection** binary sensor - it should be "On"
-2. Check your network connection
-3. Verify the device is powered on
-4. Check the integration diagnostics (Settings → Devices & Services → Universal Water Heater → 3 dots → Download diagnostics)
+1. Refresh the page in Home Assistant UI
+2. Restart Home Assistant
+3. Check integration diagnostics (Settings → Devices & Services → Universal Water Heater → 3 dots → Download diagnostics)
 
 ## 🤝 Contributing
 

@@ -16,7 +16,6 @@
       "configure_entities": {
         "description": "Configure which entities provide data for your water heater device. All fields are optional and can be configured later.",
         "data": {
-          "update_interval_hours": "Update interval (hours)",
           "enable_debugging": "Enable debug logging",
           "custom_icon": "Custom icon (optional)",
           "temperature_source_entity_id": "Water Temperature Source",
@@ -26,7 +25,6 @@
           "switch_source_entity_id": "Switch Source"
         },
         "data_description": {
-          "update_interval_hours": "How often to refresh data from the API (0.25 to 24 hours)",
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
           "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
           "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
@@ -35,17 +33,9 @@
           "current_source_entity_id": "Select the entity that provides current (amperage) data",
           "switch_source_entity_id": "Select the switch entity to control"
         }
-      },
-      "reauth_confirm": {
-        "title": "Reauthenticate Integration",
-        "description": "Device configuration needs to be updated. Please provide the device name.",
-        "data": {
-          "name": "Device Name"
-        }
       }
     },
     "error": {
-      "auth": "Authentication error.",
       "connection": "Unable to connect to the server.",
       "unknown": "Unknown error occurred.",
       "invalid_device_name": "Invalid device name. Please provide a valid name."
@@ -60,7 +50,6 @@
         "title": "Configure Integration Options",
         "description": "Customize how this integration operates.",
         "data": {
-          "update_interval_hours": "Update interval (hours)",
           "enable_debugging": "Enable debug logging",
           "custom_icon": "Custom icon (optional)",
           "temperature_source_entity_id": "Water Temperature Source",
@@ -70,7 +59,6 @@
           "switch_source_entity_id": "Switch Source"
         },
         "data_description": {
-          "update_interval_hours": "How often to refresh data from the API (0.25 to 24 hours)",
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
           "custom_icon": "Override the default icon for entities (optional)",
           "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
@@ -83,9 +71,6 @@
     }
   },
   "exceptions": {
-    "authentication_failed": {
-      "message": "Authentication failed during data update."
-    },
     "update_failed": {
       "message": "Failed to update data from the server."
     },
@@ -101,16 +86,10 @@
   },
   "entity": {
     "sensor": {
-      "air_quality_index": {
-        "name": "Air Quality Index"
-      },
-      "pm25": {
-        "name": "PM2.5"
-      },
       "water_temperature": {
         "name": "Water Temperature"
       },
-      "power": {
+      "power_consumption": {
         "name": "Power"
       },
       "voltage": {
@@ -122,15 +101,15 @@
     },
     "binary_sensor": {},
     "switch": {
-      "linked_switch": {
-        "name": "Linked Switch"
+      "heater_switch": {
+        "name": "Heater Switch"
       }
     },
     "select": {
       "mode": {
         "name": "Mode",
         "state": {
-          "high": "High",
+          "normal": "Normal",
           "optimised": "Optimised",
           "eco": "Eco",
           "off": "Off"
@@ -139,47 +118,19 @@
     },
     "number": {
       "normal_temperature": {
-        "name": "Temperature (Normal)"
+        "name": "Target Temperature"
       },
       "eco_temperature": {
-        "name": "Temperature (Eco)"
+        "name": "Eco Temperature"
       },
       "max_temperature": {
-        "name": "Temperature (Max)"
+        "name": "Maximum Temperature"
       },
       "hysteresis": {
         "name": "Hysteresis"
       }
     },
-    "button": {},
-    "fan": {
-      "air_purifier": {
-        "name": "Air Purifier"
-      }
-    }
+    "button": {}
   },
-  "issues": {
-    "deprecated_api_endpoint": {
-      "title": "Deprecated API Endpoint",
-      "fix_flow": {
-        "step": {
-          "init": {
-            "title": "Update API Endpoint",
-            "description": "Your device is using API version {api_version} which is deprecated. Please update to v2 for continued support and new features.\n\nClick Submit to update your device to use the new API endpoint (v2). This will reload the integration."
-          }
-        }
-      }
-    },
-    "missing_configuration": {
-      "title": "Missing Configuration",
-      "fix_flow": {
-        "step": {
-          "init": {
-            "title": "Acknowledge Configuration Issue",
-            "description": "Some configuration options are missing or invalid. Please reconfigure the integration to ensure proper operation.\n\nClick Submit to acknowledge this issue. You may need to reconfigure the integration if problems persist."
-          }
-        }
-      }
-    }
-  }
+  "issues": {}
 }

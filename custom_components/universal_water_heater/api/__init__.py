@@ -2,14 +2,12 @@
 
 from .client import (
     UniversalWaterHeaterApiClient,
-    UniversalWaterHeaterApiClientAuthenticationError,
     UniversalWaterHeaterApiClientCommunicationError,
     UniversalWaterHeaterApiClientError,
 )
 
 __all__ = [
     "UniversalWaterHeaterApiClient",
-    "UniversalWaterHeaterApiClientAuthenticationError",
     "UniversalWaterHeaterApiClientCommunicationError",
     "UniversalWaterHeaterApiClientError",
 ]

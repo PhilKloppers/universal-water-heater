@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 ENTITY_DESCRIPTIONS = (
     SwitchEntityDescription(
-        key="linked_switch",
-        translation_key="linked_switch",
+        key="heater_switch",
+        translation_key="heater_switch",
         icon="mdi:link-variant",
         device_class=SwitchDeviceClass.SWITCH,
         has_entity_name=True,

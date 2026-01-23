@@ -2,8 +2,8 @@
 Core DataUpdateCoordinator implementation for universal_water_heater.
 
 This module contains the main coordinator class that manages data fetching
-and updates for all entities in the integration. It handles refresh cycles,
-error handling, and triggers reauthentication when needed.
+and updates for all entities in the integration. It handles refresh cycles
+and error handling.
 
 For more information on coordinators:
 https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -13,12 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from custom_components.universal_water_heater.api import (
-    UniversalWaterHeaterApiClientAuthenticationError,
-    UniversalWaterHeaterApiClientError,
-)
+from custom_components.universal_water_heater.api import UniversalWaterHeaterApiClientError
 from custom_components.universal_water_heater.const import LOGGER
-from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 if TYPE_CHECKING:
@@ -108,12 +104,6 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
             # In production, you could pass listening_contexts to optimize the API call:
             # return await self.config_entry.runtime_data.client.async_get_data(listening_contexts)
             return await self.config_entry.runtime_data.client.async_get_data()
-        except UniversalWaterHeaterApiClientAuthenticationError as exception:
-            LOGGER.warning("Authentication error - %s", exception)
-            raise ConfigEntryAuthFailed(
-                translation_domain="universal_water_heater",
-                translation_key="authentication_failed",
-            ) from exception
         except UniversalWaterHeaterApiClientError as exception:
             LOGGER.exception("Error communicating with API")
             # If the API provides rate limit information, you can honor it:

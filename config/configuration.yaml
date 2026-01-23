@@ -177,3 +177,36 @@ template:
         unit_of_measurement: "A"
         state: >
           {{ states('sensor.power')|float / states('sensor.voltage')|float | round(2) }}
+      - name: "Temperature"
+        unique_id: "temperature_sensor"
+        icon: "mdi:code-brackets"
+        unit_of_measurement: "°C"
+        state: >
+          {{ (states('input_number.temperature'))|float }}
+  - input_number:
+      - name: temperature
+        unique_id: temperature_input_number
+        icon: "mdi:settings-helper"
+        initial: 25
+        min: 20
+        max: 100
+        step: 1
+  - input_boolean:
+      - name: "Heater Relay Helper"
+        initial: on
+        unique_id: "relay_helper_input_boolean"
+        icon: "mdi:settings-helper"
+  - switch:
+      - name: "Heater Relay"
+        unique_id: "heater_relay_switch"
+        icon: "mdi:code-brackets"
+        state: >
+          {{ is_state('input_boolean.relay_helper', 'on') }}
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.relay_helper
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.relay_helper

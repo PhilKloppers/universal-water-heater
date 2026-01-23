@@ -17,7 +17,7 @@ from typing import Any
 
 import voluptuous as vol
 
-from custom_components.universal_water_heater.const import DEFAULT_ENABLE_DEBUGGING, DEFAULT_UPDATE_INTERVAL_HOURS
+from custom_components.universal_water_heater.const import DEFAULT_ENABLE_DEBUGGING
 from homeassistant.helpers import selector
 
 
@@ -36,18 +36,6 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
     return vol.Schema(
         {
             vol.Optional(
-                "update_interval_hours",
-                default=defaults.get("update_interval_hours", DEFAULT_UPDATE_INTERVAL_HOURS),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.25,
-                    max=24,
-                    step=0.25,
-                    unit_of_measurement="h",
-                    mode=selector.NumberSelectorMode.BOX,
-                ),
-            ),
-            vol.Optional(
                 "enable_debugging",
                 default=defaults.get("enable_debugging", DEFAULT_ENABLE_DEBUGGING),
             ): selector.BooleanSelector(),
@@ -60,7 +48,7 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
                 default=defaults.get("temperature_source_entity_id"),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
-                    domain=["sensor", "binary_sensor", "weather"],
+                    domain=["sensor"],
                 ),
             ),
             vol.Optional(

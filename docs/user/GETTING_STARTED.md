@@ -39,24 +39,25 @@ After installation, add the integration:
 3. Search for "Universal Water Heater"
 4. Follow the configuration steps:
 
-### Step 1: Connection Information
+### Step 1: Enter Device Name
 
-Enter the required connection details:
+Enter a friendly name for your device:
 
-- **Host/IP Address:** The hostname or IP address of your device/service
-- **API Key/Token:** Your authentication credentials (if applicable)
-- **Port:** Connection port (default: 8080)
+- **Device Name:** A descriptive name for this integration instance
 
-Click **Submit** to test the connection.
+Click **Submit** to proceed.
 
-### Step 2: Configuration Options
+### Step 2: Configure Entity Sources
 
-Configure optional settings:
+Configure which entities provide data for your device (optional):
 
-- **Update Interval:** How often to poll for updates (default: 5 minutes)
-- **Name:** Friendly name for this integration instance
+- **Water Temperature Source:** Select a temperature entity to track water temperature
+- **Power Source:** Select a power consumption entity
+- **Voltage Source:** Select a voltage entity
+- **Current Source:** Select a current entity
+- **Heater Switch Source:** Select a switch to mirror and control
 
-Click **Submit** to complete setup.
+All fields are optional and can be configured later. Click **Submit** to complete setup.
 
 ## What Gets Created
 
@@ -71,24 +72,28 @@ After successful setup, the integration creates:
 
 ### Entities
 
-The following entities are automatically created:
+The integration creates the following entity types:
 
 #### Sensors
-
-- `sensor.<device_name>_<sensor_name>` - Descriptive sensor measurements
-- More sensors as applicable to your setup
+- Water Temperature (linked to source entity)
+- Power Consumption (linked to source entity)
+- Voltage (linked to source entity)
+- Current (linked to source entity)
 
 #### Binary Sensors
-
-- `binary_sensor.<device_name>_<sensor_name>` - On/off status indicators
+- API Connectivity status
 
 #### Switches
+- Heater Switch (linked to source entity, bidirectional)
 
-- `switch.<device_name>_<switch_name>` - Controllable on/off switches
+#### Select
+- Mode (Normal, Optimised, Eco, Off)
 
-#### Other Platforms
-
-Additional entities may be created depending on your device capabilities.
+#### Numbers
+- Temperature (Normal) - 40-80°C, default 65°C
+- Temperature (Eco) - 40-80°C, default 55°C
+- Temperature (Max) - 50-85°C, default 75°C
+- Hysteresis - 0.1-5°C, default 4°C
 
 ## First Steps
 
@@ -107,9 +112,14 @@ Example entities card:
 type: entities
 title: Universal Water Heater
 entities:
-  - sensor.device_name_sensor
-  - binary_sensor.device_name_connectivity
-  - switch.device_name_switch
+  - sensor.device_name_water_temperature
+  - sensor.device_name_power
+  - sensor.device_name_voltage
+  - sensor.device_name_current
+  - select.device_name_mode
+  - number.device_name_normal_temperature
+  - number.device_name_eco_temperature
+  - switch.device_name_heater_switch
 ```
 
 ### Automations
@@ -146,21 +156,20 @@ automation:
 
 ## Troubleshooting
 
-### Connection Failed
+### Setup Failed
 
-If setup fails with connection errors:
+If setup fails:
 
-1. Verify the host/IP address is correct and reachable
-2. Check that the API key/token is valid
-3. Ensure no firewall is blocking the connection
-4. Check Home Assistant logs for detailed error messages
+1. Verify the device name is entered correctly
+2. Ensure Home Assistant can reach your entities
+3. Check Home Assistant logs for detailed error messages
 
 ### Entities Not Updating
 
 If entities show "Unavailable" or don't update:
 
-1. Check that the device/service is online
-2. Verify API credentials haven't expired
+1. Verify the source entities you configured still exist
+2. Check that source entities are available (not unavailable)
 3. Review logs: **Settings** → **System** → **Logs**
 4. Try reloading the integration
 
