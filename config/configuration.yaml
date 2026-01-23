@@ -31,7 +31,6 @@ system_health:
 # Core integrations
 http:
   # Development server settings for Codespaces/DevContainer
-  server_host: "0.0.0.0"
   # Allow access from Codespaces reverse proxy
   use_x_forwarded_for: true
   trusted_proxies:
@@ -158,6 +157,21 @@ logger:
     # Your integration debug logging - shows EVERYTHING from your integration
     custom_components.universal_water_heater: debug
 
+input_number:
+  temperature:
+    name: temperature
+    icon: "mdi:settings-helper"
+    initial: 25
+    min: 20
+    max: 100
+    step: 1
+
+input_boolean:
+  relay_helper:
+    name: "Heater Relay Helper"
+    initial: on
+    icon: "mdi:settings-helper"
+
 template:
   - sensor:
       - name: "Power"
@@ -182,20 +196,7 @@ template:
         icon: "mdi:code-brackets"
         unit_of_measurement: "°C"
         state: >
-          {{ (states('input_number.temperature'))|float }}
-  - input_number:
-      - name: temperature
-        unique_id: temperature_input_number
-        icon: "mdi:settings-helper"
-        initial: 25
-        min: 20
-        max: 100
-        step: 1
-  - input_boolean:
-      - name: "Heater Relay Helper"
-        initial: on
-        unique_id: "relay_helper_input_boolean"
-        icon: "mdi:settings-helper"
+          {{ (states('input_number.temperature'))|float(0) }}
   - switch:
       - name: "Heater Relay"
         unique_id: "heater_relay_switch"
