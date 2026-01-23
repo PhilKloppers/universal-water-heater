@@ -9,6 +9,7 @@ from custom_components.universal_water_heater.service_actions.example_service im
     async_handle_example_action,
     async_handle_reload_data,
 )
+from custom_components.universal_water_heater.service_actions.set_eco_temperature import async_set_eco_temperature
 from custom_components.universal_water_heater.service_actions.set_target_temperature import async_set_target_temperature
 from homeassistant.core import ServiceCall
 
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
 SERVICE_EXAMPLE_ACTION = "example_action"
 SERVICE_RELOAD_DATA = "reload_data"
 SERVICE_SET_TARGET_TEMPERATURE = "set_target_temperature"
+SERVICE_SET_ECO_TEMPERATURE = "set_eco_temperature"
 
 
 async def async_setup_services(hass: HomeAssistant) -> None:
@@ -70,6 +72,18 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         entry = entries[0]
         await async_set_target_temperature(hass, entry, call)
 
+    async def handle_set_eco_temperature(call: ServiceCall) -> None:
+        """Handle the set_eco_temperature service call."""
+        # Find all config entries for this domain
+        entries = hass.config_entries.async_entries(DOMAIN)
+        if not entries:
+            LOGGER.warning("No config entries found for %s", DOMAIN)
+            return
+
+        # Use first entry (or implement logic to select specific entry)
+        entry = entries[0]
+        await async_set_eco_temperature(hass, entry, call)
+
     # Register services (only once at component level)
     if not hass.services.has_service(DOMAIN, SERVICE_EXAMPLE_ACTION):
         hass.services.async_register(
@@ -90,6 +104,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             DOMAIN,
             SERVICE_SET_TARGET_TEMPERATURE,
             handle_set_target_temperature,
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_SET_ECO_TEMPERATURE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SET_ECO_TEMPERATURE,
+            handle_set_eco_temperature,
         )
 
     LOGGER.debug("Services registered for %s", DOMAIN)

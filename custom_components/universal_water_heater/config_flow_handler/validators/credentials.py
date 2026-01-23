@@ -1,48 +1,42 @@
 """
-Credential validators.
+Device name validators.
 
-Validation functions for user credentials and authentication.
+Validation functions for device name configuration.
 
 When this file grows, consider splitting into:
-- credentials.py: Basic credential validation
-- oauth.py: OAuth-specific validation
-- api_auth.py: API authentication methods
+- device.py: Device name validation
+- api_connection.py: API connection testing
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_components.universal_water_heater.api import UniversalWaterHeaterApiClient
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
-
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
 
-async def validate_credentials(hass: HomeAssistant, username: str, password: str) -> None:
+async def validate_device_name(hass: HomeAssistant, device_name: str) -> None:
     """
-    Validate user credentials by testing API connection.
+    Validate device name.
 
     Args:
         hass: Home Assistant instance.
-        username: The username to validate.
-        password: The password to validate.
+        device_name: The device name to validate.
 
     Raises:
-        UniversalWaterHeaterApiClientAuthenticationError: If credentials are invalid.
-        UniversalWaterHeaterApiClientCommunicationError: If communication fails.
-        UniversalWaterHeaterApiClientError: For other API errors.
+        ValueError: If device name is invalid (empty, too long, etc.).
 
     """
-    client = UniversalWaterHeaterApiClient(
-        username=username,
-        password=password,
-        session=async_create_clientsession(hass),
-    )
-    await client.async_get_data()  # May raise authentication/communication errors
+    if not device_name or not device_name.strip():
+        msg = "Device name cannot be empty"
+        raise ValueError(msg)
+
+    if len(device_name) > 100:
+        msg = "Device name must be less than 100 characters"
+        raise ValueError(msg)
 
 
 __all__ = [
-    "validate_credentials",
+    "validate_device_name",
 ]

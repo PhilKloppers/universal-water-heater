@@ -1,4 +1,4 @@
-"""Target temperature number for universal_water_heater."""
+"""Target temperature (Normal mode) number for universal_water_heater."""
 
 from __future__ import annotations
 
@@ -16,22 +16,22 @@ if TYPE_CHECKING:
 
 ENTITY_DESCRIPTIONS = (
     NumberEntityDescription(
-        key="target_temperature",
-        translation_key="target_temperature",
+        key="normal_temperature",
+        translation_key="normal_temperature",
         icon="mdi:thermometer",
         device_class=NumberDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        native_min_value=20,
+        native_min_value=40,
         native_max_value=80,
-        native_step=0.5,
+        native_step=1,
         mode=NumberMode.SLIDER,
         has_entity_name=True,
     ),
 )
 
 
-class UniversalWaterHeaterTargetTemperatureNumber(NumberEntity, UniversalWaterHeaterEntity):
-    """Target temperature number class."""
+class UniversalWaterHeaterNormalTemperatureNumber(NumberEntity, UniversalWaterHeaterEntity):
+    """Normal mode target temperature number class."""
 
     def __init__(
         self,
@@ -40,8 +40,8 @@ class UniversalWaterHeaterTargetTemperatureNumber(NumberEntity, UniversalWaterHe
     ) -> None:
         """Initialize the number."""
         super().__init__(coordinator, entity_description)
-        # Default target temperature
-        self._attr_native_value: float = 50.0
+        # Default target temperature for normal mode
+        self._attr_native_value: float = 65.0
 
     @property
     def native_value(self) -> float:
@@ -56,7 +56,7 @@ class UniversalWaterHeaterTargetTemperatureNumber(NumberEntity, UniversalWaterHe
 
             self._attr_native_value = value
             self.async_write_ha_state()
-            LOGGER.debug("Target temperature set to %s°C", value)
+            LOGGER.debug("Target temperature (Normal) set to %s°C", value)
         except UniversalWaterHeaterApiClientError as exception:
             LOGGER.exception("Failed to set target temperature")
             raise HomeAssistantError(

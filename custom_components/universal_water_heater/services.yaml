@@ -31,16 +31,31 @@ reload_data:
 
 set_target_temperature:
   name: Set Target Temperature
-  description: Set the target temperature for the water heater. The temperature must be within the minimum and maximum temperature bounds.
+  description: Set the normal mode target temperature for the water heater. The temperature must be between 40°C and the current Temperature (Max) setting.
   fields:
     temperature:
       name: Temperature
-      description: The target temperature in Celsius. Must be between the Minimum Temperature and Maximum Temperature number entities.
+      description: The target temperature in Celsius (40°C to Temperature (Max)).
       required: true
-      example: 50
+      example: 65
       selector:
         number:
-          min: 20
+          min: 40
           max: 80
-          step: 0.5
+          step: 1
+          unit_of_measurement: "°C"
+set_eco_temperature:
+  name: Set Eco Temperature
+  description: Set the eco mode target temperature for the water heater. The temperature must be between 40°C and the current Temperature (Max) setting, and cannot exceed the Temperature (Normal) value.
+  fields:
+    temperature:
+      name: Temperature
+      description: The eco temperature in Celsius (40°C to Temperature (Max) and ≤ Temperature (Normal)).
+      required: true
+      example: 55
+      selector:
+        number:
+          min: 40
+          max: 80
+          step: 1
           unit_of_measurement: "°C"

@@ -157,3 +157,23 @@ logger:
 
     # Your integration debug logging - shows EVERYTHING from your integration
     custom_components.universal_water_heater: debug
+
+template:
+  - sensor:
+      - name: "Power"
+        unique_id: "power_sensor"
+        icon: "mdi:code-brackets"
+        unit_of_measurement: "W"
+        state: >
+          {{ states('sensor.time').split(':')[1]|int * 10 }}
+      - name: "Voltage"
+        unique_id: "voltage_sensor"
+        icon: "mdi:code-brackets"
+        unit_of_measurement: "V"
+        state: "225"
+      - name: "Current"
+        unique_id: "current_sensor"
+        icon: "mdi:code-brackets"
+        unit_of_measurement: "A"
+        state: >
+          {{ states('sensor.power')|float / states('sensor.voltage')|float | round(2) }}

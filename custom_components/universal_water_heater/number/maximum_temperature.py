@@ -16,14 +16,14 @@ if TYPE_CHECKING:
 
 ENTITY_DESCRIPTIONS = (
     NumberEntityDescription(
-        key="maximum_temperature",
-        translation_key="maximum_temperature",
+        key="max_temperature",
+        translation_key="max_temperature",
         icon="mdi:thermometer-high",
         device_class=NumberDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=50,
         native_max_value=85,
-        native_step=0.5,
+        native_step=1,
         mode=NumberMode.SLIDER,
         has_entity_name=True,
     ),
@@ -41,7 +41,7 @@ class UniversalWaterHeaterMaximumTemperatureNumber(NumberEntity, UniversalWaterH
         """Initialize the number."""
         super().__init__(coordinator, entity_description)
         # Default maximum temperature
-        self._attr_native_value: float = 70.0
+        self._attr_native_value: float = 75.0
 
     @property
     def native_value(self) -> float:

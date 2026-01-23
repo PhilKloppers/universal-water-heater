@@ -4,30 +4,51 @@
       "user": {
         "description": "If you need help with the configuration have a look here: https://github.com/PhilKloppers/universal-water-heater",
         "data": {
-          "username": "Username",
-          "password": "Password"
+          "name": "Device Name"
         }
       },
       "reconfigure": {
-        "description": "Update the credentials for this integration.",
+        "description": "Update the device name for this integration.",
         "data": {
-          "username": "Username",
-          "password": "Password"
+          "name": "Device Name"
+        }
+      },
+      "configure_entities": {
+        "description": "Configure which entities provide data for your water heater device. All fields are optional and can be configured later.",
+        "data": {
+          "update_interval_hours": "Update interval (hours)",
+          "enable_debugging": "Enable debug logging",
+          "custom_icon": "Custom icon (optional)",
+          "temperature_source_entity_id": "Water Temperature Source",
+          "power_source_entity_id": "Power Consumption Source",
+          "voltage_source_entity_id": "Voltage Source",
+          "current_source_entity_id": "Current Source",
+          "switch_source_entity_id": "Switch Source"
+        },
+        "data_description": {
+          "update_interval_hours": "How often to refresh data from the API (0.25 to 24 hours)",
+          "enable_debugging": "Enable detailed debug logging for troubleshooting",
+          "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
+          "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
+          "power_source_entity_id": "Select the entity that provides power consumption data",
+          "voltage_source_entity_id": "Select the entity that provides voltage data",
+          "current_source_entity_id": "Select the entity that provides current (amperage) data",
+          "switch_source_entity_id": "Select the switch entity to control"
         }
       },
       "reauth_confirm": {
         "title": "Reauthenticate Integration",
-        "description": "The credentials for {username} are no longer valid. Please provide updated credentials to restore access.",
+        "description": "Device configuration needs to be updated. Please provide the device name.",
         "data": {
-          "username": "Username",
-          "password": "Password"
+          "name": "Device Name"
         }
       }
     },
     "error": {
-      "auth": "Username/Password is wrong.",
+      "auth": "Authentication error.",
       "connection": "Unable to connect to the server.",
-      "unknown": "Unknown error occurred."
+      "unknown": "Unknown error occurred.",
+      "invalid_device_name": "Invalid device name. Please provide a valid name."
     },
     "abort": {
       "already_configured": "This entry is already configured."
@@ -41,12 +62,22 @@
         "data": {
           "update_interval_hours": "Update interval (hours)",
           "enable_debugging": "Enable debug logging",
-          "custom_icon": "Custom icon (optional)"
+          "custom_icon": "Custom icon (optional)",
+          "temperature_source_entity_id": "Water Temperature Source",
+          "power_source_entity_id": "Power Consumption Source",
+          "voltage_source_entity_id": "Voltage Source",
+          "current_source_entity_id": "Current Source",
+          "switch_source_entity_id": "Switch Source"
         },
         "data_description": {
           "update_interval_hours": "How often to refresh data from the API (0.25 to 24 hours)",
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
-          "custom_icon": "Override the default icon for entities (optional)"
+          "custom_icon": "Override the default icon for entities (optional)",
+          "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
+          "power_source_entity_id": "Select the entity that provides power consumption data",
+          "voltage_source_entity_id": "Select the entity that provides voltage data",
+          "current_source_entity_id": "Select the entity that provides current (amperage) data",
+          "switch_source_entity_id": "Select the switch entity to control"
         }
       }
     }
@@ -76,50 +107,51 @@
       "pm25": {
         "name": "PM2.5"
       },
-      "filter_life": {
-        "name": "Filter Life Remaining"
+      "water_temperature": {
+        "name": "Water Temperature"
       },
-      "runtime": {
-        "name": "Total Runtime"
+      "power": {
+        "name": "Power"
+      },
+      "voltage": {
+        "name": "Voltage"
+      },
+      "current": {
+        "name": "Current"
       }
     },
-    "binary_sensor": {
-      "api_connectivity": {
-        "name": "API Connection"
-      },
-      "filter_replacement": {
-        "name": "Filter Replacement Needed"
-      }
-    },
+    "binary_sensor": {},
     "switch": {
-      "child_lock": {
-        "name": "Child Lock"
-      },
-      "led_display": {
-        "name": "LED Display"
+      "linked_switch": {
+        "name": "Linked Switch"
       }
     },
     "select": {
-      "fan_speed": {
-        "name": "Fan Speed",
+      "mode": {
+        "name": "Mode",
         "state": {
-          "low": "Low",
-          "medium": "Medium",
           "high": "High",
-          "auto": "Auto"
+          "optimised": "Optimised",
+          "eco": "Eco",
+          "off": "Off"
         }
       }
     },
     "number": {
-      "target_humidity": {
-        "name": "Target Humidity"
+      "normal_temperature": {
+        "name": "Temperature (Normal)"
+      },
+      "eco_temperature": {
+        "name": "Temperature (Eco)"
+      },
+      "max_temperature": {
+        "name": "Temperature (Max)"
+      },
+      "hysteresis": {
+        "name": "Hysteresis"
       }
     },
-    "button": {
-      "reset_filter": {
-        "name": "Reset Filter Timer"
-      }
-    },
+    "button": {},
     "fan": {
       "air_purifier": {
         "name": "Air Purifier"

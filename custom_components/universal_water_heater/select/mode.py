@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Mode(StrEnum):
     """Mode enum."""
 
-    HIGH = "high"
+    NORMAL = "normal"
     OPTIMISED = "optimised"
     ECO = "eco"
     OFF = "off"

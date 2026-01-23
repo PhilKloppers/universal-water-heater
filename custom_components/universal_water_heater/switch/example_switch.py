@@ -16,14 +16,6 @@ if TYPE_CHECKING:
 
 ENTITY_DESCRIPTIONS = (
     SwitchEntityDescription(
-        key="child_lock",
-        translation_key="child_lock",
-        icon="mdi:lock",
-        device_class=SwitchDeviceClass.SWITCH,
-        entity_category=EntityCategory.CONFIG,
-        has_entity_name=True,
-    ),
-    SwitchEntityDescription(
         key="led_display",
         translation_key="led_display",
         icon="mdi:led-on",

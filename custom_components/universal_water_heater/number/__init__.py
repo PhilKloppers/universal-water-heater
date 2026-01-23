@@ -7,19 +7,18 @@ from typing import TYPE_CHECKING
 from custom_components.universal_water_heater.const import PARALLEL_UPDATES as PARALLEL_UPDATES
 from homeassistant.components.number import NumberEntityDescription
 
+from .eco_temperature import (
+    ENTITY_DESCRIPTIONS as ECO_TEMPERATURE_DESCRIPTIONS,
+    UniversalWaterHeaterEcoTemperatureNumber,
+)
 from .hysteresis import ENTITY_DESCRIPTIONS as HYSTERESIS_DESCRIPTIONS, UniversalWaterHeaterHysteresisNumber
 from .maximum_temperature import (
     ENTITY_DESCRIPTIONS as MAXIMUM_TEMPERATURE_DESCRIPTIONS,
     UniversalWaterHeaterMaximumTemperatureNumber,
 )
-from .minimum_temperature import (
-    ENTITY_DESCRIPTIONS as MINIMUM_TEMPERATURE_DESCRIPTIONS,
-    UniversalWaterHeaterMinimumTemperatureNumber,
-)
-from .target_humidity import ENTITY_DESCRIPTIONS as HUMIDITY_DESCRIPTIONS, UniversalWaterHeaterHumidityNumber
 from .target_temperature import (
-    ENTITY_DESCRIPTIONS as TARGET_TEMPERATURE_DESCRIPTIONS,
-    UniversalWaterHeaterTargetTemperatureNumber,
+    ENTITY_DESCRIPTIONS as NORMAL_TEMPERATURE_DESCRIPTIONS,
+    UniversalWaterHeaterNormalTemperatureNumber,
 )
 
 if TYPE_CHECKING:
@@ -29,9 +28,8 @@ if TYPE_CHECKING:
 
 # Combine all entity descriptions from different modules
 ENTITY_DESCRIPTIONS: tuple[NumberEntityDescription, ...] = (
-    *HUMIDITY_DESCRIPTIONS,
-    *TARGET_TEMPERATURE_DESCRIPTIONS,
-    *MINIMUM_TEMPERATURE_DESCRIPTIONS,
+    *NORMAL_TEMPERATURE_DESCRIPTIONS,
+    *ECO_TEMPERATURE_DESCRIPTIONS,
     *MAXIMUM_TEMPERATURE_DESCRIPTIONS,
     *HYSTERESIS_DESCRIPTIONS,
 )
@@ -44,25 +42,18 @@ async def async_setup_entry(
 ) -> None:
     """Set up the number platform."""
     async_add_entities(
-        UniversalWaterHeaterHumidityNumber(
+        UniversalWaterHeaterNormalTemperatureNumber(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
         )
-        for entity_description in HUMIDITY_DESCRIPTIONS
+        for entity_description in NORMAL_TEMPERATURE_DESCRIPTIONS
     )
     async_add_entities(
-        UniversalWaterHeaterTargetTemperatureNumber(
+        UniversalWaterHeaterEcoTemperatureNumber(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
         )
-        for entity_description in TARGET_TEMPERATURE_DESCRIPTIONS
-    )
-    async_add_entities(
-        UniversalWaterHeaterMinimumTemperatureNumber(
-            coordinator=entry.runtime_data.coordinator,
-            entity_description=entity_description,
-        )
-        for entity_description in MINIMUM_TEMPERATURE_DESCRIPTIONS
+        for entity_description in ECO_TEMPERATURE_DESCRIPTIONS
     )
     async_add_entities(
         UniversalWaterHeaterMaximumTemperatureNumber(

@@ -19,7 +19,7 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_NAME
 from homeassistant.helpers import selector
 
 
@@ -31,35 +31,30 @@ def get_user_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
         defaults: Optional dictionary of default values to pre-populate the form.
 
     Returns:
-        Voluptuous schema for user credentials input.
+        Voluptuous schema for device name input.
 
     """
     defaults = defaults or {}
     return vol.Schema(
         {
             vol.Required(
-                CONF_USERNAME,
-                default=defaults.get(CONF_USERNAME, vol.UNDEFINED),
+                CONF_NAME,
+                default=defaults.get(CONF_NAME, vol.UNDEFINED),
             ): selector.TextSelector(
                 selector.TextSelectorConfig(
                     type=selector.TextSelectorType.TEXT,
-                ),
-            ),
-            vol.Required(CONF_PASSWORD): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    type=selector.TextSelectorType.PASSWORD,
                 ),
             ),
         },
     )
 
 
-def get_reconfigure_schema(username: str) -> vol.Schema:
+def get_reconfigure_schema(name: str) -> vol.Schema:
     """
     Get schema for reconfigure step.
 
     Args:
-        username: Current username to pre-fill in the form.
+        name: Current device name to pre-fill in the form.
 
     Returns:
         Voluptuous schema for reconfiguration.
@@ -68,30 +63,20 @@ def get_reconfigure_schema(username: str) -> vol.Schema:
     return vol.Schema(
         {
             vol.Required(
-                CONF_USERNAME,
-                default=username,
+                CONF_NAME,
+                default=name,
             ): selector.TextSelector(
                 selector.TextSelectorConfig(
                     type=selector.TextSelectorType.TEXT,
-                ),
-            ),
-            vol.Required(
-                CONF_PASSWORD,
-            ): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    type=selector.TextSelectorType.PASSWORD,
                 ),
             ),
         },
     )
 
 
-def get_reauth_schema(username: str) -> vol.Schema:
+def get_reauth_schema() -> vol.Schema:
     """
     Get schema for reauthentication step.
-
-    Args:
-        username: Current username to pre-fill in the form.
 
     Returns:
         Voluptuous schema for reauthentication.
@@ -100,18 +85,10 @@ def get_reauth_schema(username: str) -> vol.Schema:
     return vol.Schema(
         {
             vol.Required(
-                CONF_USERNAME,
-                default=username,
+                CONF_NAME,
             ): selector.TextSelector(
                 selector.TextSelectorConfig(
                     type=selector.TextSelectorType.TEXT,
-                ),
-            ),
-            vol.Required(
-                CONF_PASSWORD,
-            ): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    type=selector.TextSelectorType.PASSWORD,
                 ),
             ),
         },

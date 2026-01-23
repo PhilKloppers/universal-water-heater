@@ -77,7 +77,7 @@ async def async_get_config_entry_diagnostics(
     # API client information (no sensitive data)
     api_info = {
         "base_endpoint": "https://jsonplaceholder.typicode.com",
-        "has_credentials": bool(client._username),  # noqa: SLF001
+        "device_configured": bool(client._device_name),  # noqa: SLF001
     }
 
     # Integration information

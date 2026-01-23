@@ -21,9 +21,10 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
+from homeassistant.const import CONF_NAME, Platform
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 from homeassistant.loader import async_get_loaded_integration
 
 from .api import UniversalWaterHeaterApiClient
@@ -40,7 +41,6 @@ if TYPE_CHECKING:
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
-    Platform.FAN,
     Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
@@ -93,9 +93,9 @@ async def async_setup_entry(
     6. Sets up reload listener for config changes
 
     Data flow in this integration:
-    1. User enters username/password in config flow (config_flow.py)
-    2. Credentials stored in entry.data[CONF_USERNAME/CONF_PASSWORD]
-    3. API Client initialized with credentials (api/client.py)
+    1. User enters device name in config flow (config_flow.py)
+    2. Device name stored in entry.data[CONF_NAME]
+    3. API Client initialized with device name (api/client.py)
     4. Coordinator fetches data using authenticated client (coordinator/base.py)
     5. Entities access data via self.coordinator.data (sensor/, binary_sensor/, etc.)
 
@@ -114,8 +114,7 @@ async def async_setup_entry(
     """
     # Initialize client first
     client = UniversalWaterHeaterApiClient(
-        username=entry.data[CONF_USERNAME],  # From config flow setup
-        password=entry.data[CONF_PASSWORD],  # From config flow setup
+        device_name=entry.data[CONF_NAME],  # From config flow setup
         session=async_get_clientsession(hass),
     )
 
@@ -138,6 +137,16 @@ async def async_setup_entry(
 
     # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
     await coordinator.async_config_entry_first_refresh()
+
+    # Register device in device registry to ensure entities appear under device, not integration
+    device_registry = async_get_device_registry(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=entry.title,
+        manufacturer=DOMAIN,
+        model="Universal Water Heater",
+    )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))

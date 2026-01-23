@@ -22,7 +22,7 @@ ENTITY_DESCRIPTIONS = (
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         native_min_value=0.1,
         native_max_value=5,
-        native_step=0.1,
+        native_step=1,
         mode=NumberMode.SLIDER,
         has_entity_name=True,
     ),
@@ -40,7 +40,7 @@ class UniversalWaterHeaterHysteresisNumber(NumberEntity, UniversalWaterHeaterEnt
         """Initialize the number."""
         super().__init__(coordinator, entity_description)
         # Default hysteresis
-        self._attr_native_value: float = 2.0
+        self._attr_native_value: float = 4.0
 
     @property
     def native_value(self) -> float:

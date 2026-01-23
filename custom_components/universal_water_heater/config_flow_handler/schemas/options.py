@@ -53,16 +53,8 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
             ): selector.BooleanSelector(),
             vol.Optional(
                 "custom_icon",
-                default=defaults.get("custom_icon"),
+                default=defaults.get("custom_icon", ""),
             ): selector.IconSelector(),
-            vol.Optional(
-                "current_source_entity_id",
-                default=defaults.get("current_source_entity_id"),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["sensor"],
-                ),
-            ),
             vol.Optional(
                 "temperature_source_entity_id",
                 default=defaults.get("temperature_source_entity_id"),
@@ -82,6 +74,14 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
             vol.Optional(
                 "voltage_source_entity_id",
                 default=defaults.get("voltage_source_entity_id"),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sensor"],
+                ),
+            ),
+            vol.Optional(
+                "current_source_entity_id",
+                default=defaults.get("current_source_entity_id"),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=["sensor"],

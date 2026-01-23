@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from custom_components.universal_water_heater.entity import UniversalWaterHeaterEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription, SensorStateClass
-from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfTime
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -14,17 +14,6 @@ if TYPE_CHECKING:
     from custom_components.universal_water_heater.coordinator import UniversalWaterHeaterDataUpdateCoordinator
 
 ENTITY_DESCRIPTIONS = (
-    SensorEntityDescription(
-        key="filter_life",
-        translation_key="filter_life",
-        icon="mdi:percent",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        device_class=SensorDeviceClass.POWER_FACTOR,
-        native_unit_of_measurement=PERCENTAGE,
-        suggested_display_precision=0,
-        state_class=SensorStateClass.MEASUREMENT,
-        has_entity_name=True,
-    ),
     SensorEntityDescription(
         key="runtime",
         translation_key="runtime",
@@ -39,8 +28,8 @@ ENTITY_DESCRIPTIONS = (
 )
 
 
-class UniversalWaterHeaterDiagnosticSensor(SensorEntity, UniversalWaterHeaterEntity):
-    """Diagnostic sensor class for filter and runtime."""
+class UniversalWaterHeaterRuntimeSensor(SensorEntity, UniversalWaterHeaterEntity):
+    """Runtime diagnostic sensor class."""
 
     def __init__(
         self,
@@ -57,13 +46,6 @@ class UniversalWaterHeaterDiagnosticSensor(SensorEntity, UniversalWaterHeaterEnt
             return None
 
         user_id = self.coordinator.data.get("userId", 0)
-
-        # Filter life remaining (0-100%)
-        if self.entity_description.key == "filter_life":
-            # Demo: If reset button was pressed, show 100%!
-            if self.coordinator.data.get("demo_filter_reset"):
-                return 100
-            return 100 - (user_id % 100)
 
         # Total runtime in hours
         if self.entity_description.key == "runtime":

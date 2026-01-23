@@ -31,24 +31,22 @@ async def async_set_target_temperature(
         return
 
     try:
-        # Get the minimum and maximum temperature entities to validate bounds
+        # Get the maximum temperature entity to validate bounds
         entry_id = entry.entry_id
-        min_entity_id = f"number.{entry_id}_minimum_temperature"
-        max_entity_id = f"number.{entry_id}_maximum_temperature"
-        target_entity_id = f"number.{entry_id}_target_temperature"
+        max_entity_id = f"number.{entry_id}_max_temperature"
+        target_entity_id = f"number.{entry_id}_normal_temperature"
 
-        # Get current values from the number entities
-        min_state = hass.states.get(min_entity_id)
+        # Get current value from the maximum temperature entity
         max_state = hass.states.get(max_entity_id)
 
-        # Get the numeric values from the states
-        min_temp = float(min_state.state) if min_state and min_state.state not in ("unknown", "unavailable") else 20
+        # Get the numeric value from the state
         max_temp = float(max_state.state) if max_state and max_state.state not in ("unknown", "unavailable") else 80
 
-        # Validate temperature is within bounds
+        # Validate temperature is within bounds (40 to max_temperature)
+        min_temp = 40
         if not min_temp <= temperature <= max_temp:
             LOGGER.error(
-                "Target temperature %s°C is outside valid range [%s°C, %s°C]",
+                "Normal temperature %s°C is outside valid range [%s°C, %s°C]",
                 temperature,
                 min_temp,
                 max_temp,
