@@ -11,6 +11,7 @@ https://developers.home-assistant.io/docs/config_entries_config_flow_handler
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
 from slugify import slugify
@@ -21,9 +22,18 @@ from custom_components.universal_water_heater.config_flow_handler.schemas import
     get_user_schema,
 )
 from custom_components.universal_water_heater.config_flow_handler.validators import validate_device_name
-from custom_components.universal_water_heater.const import DOMAIN, LOGGER
+from custom_components.universal_water_heater.const import (
+    CONF_ECO_TEMPERATURE,
+    CONF_HYSTERESIS,
+    CONF_MAX_TEMPERATURE,
+    CONF_NORMAL_TEMPERATURE,
+    CONF_TEMPERATURES,
+    DOMAIN,
+    LOGGER,
+)
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
+from homeassistant.helpers import entity_registry as er
 
 if TYPE_CHECKING:
     from custom_components.universal_water_heater.config_flow_handler.options_flow import (
@@ -52,6 +62,13 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
     """
 
     VERSION = 1
+
+    def __init__(self) -> None:
+        """Initialize flow state."""
+
+        super().__init__()
+        self.device_name: str | None = None
+        self.temperature_settings: dict[str, float] = {}
 
     @staticmethod
     def async_get_options_flow(
@@ -101,8 +118,9 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
                 await self.async_set_unique_id(slugify(user_input[CONF_NAME]))
                 self._abort_if_unique_id_configured()
 
-                # Store device name and proceed to options configuration
+                # Store device configuration and proceed to entity linking
                 self.device_name = user_input[CONF_NAME]
+                self.temperature_settings = self._build_temperature_settings(user_input)
                 return await self.async_step_configure_entities()
 
         return self.async_show_form(
@@ -140,14 +158,17 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
             except Exception as exception:  # noqa: BLE001
                 errors["base"] = self._map_exception_to_error(exception)
             else:
-                return self.async_update_reload_and_abort(
-                    entry,
-                    data=user_input,
-                )
+                # Store device configuration and proceed to entity reconfiguration
+                self.device_name = user_input[CONF_NAME]
+                self.temperature_settings = self._build_temperature_settings(user_input)
+                return await self.async_step_reconfigure_entities()
 
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=get_reconfigure_schema(entry.data.get(CONF_NAME, "")),
+            data_schema=get_reconfigure_schema(
+                entry.data.get(CONF_NAME, ""),
+                entry.data,
+            ),
             errors=errors,
         )
 
@@ -168,20 +189,103 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
             The config flow result, either showing a form or creating the entry.
 
         """
+        device_name = self.device_name or ""
+
         if user_input is not None:
-            # User completed entity configuration, create the entry with options
+            # Pass all values as-is, including empty strings for optional fields.
+            # The sensor platform will skip entity creation for any empty/falsy values.
             return self.async_create_entry(
-                title=self.device_name,
-                data={CONF_NAME: self.device_name},
+                title=device_name,
+                data={
+                    CONF_NAME: device_name,
+                    CONF_TEMPERATURES: self.temperature_settings,
+                },
                 options=user_input,
             )
 
         # Show options form for entity configuration
+        # Pass empty dict explicitly to avoid any state carryover
         return self.async_show_form(
             step_id="configure_entities",
-            data_schema=get_options_schema(),
-            description_placeholders={"device_name": self.device_name},
+            data_schema=get_options_schema({}),
+            description_placeholders={"device_name": device_name},
         )
+
+    async def async_step_reconfigure_entities(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle entity source reconfiguration during reconfigure flow.
+
+        This step allows users to modify entity sources (power, voltage, current)
+        during reconfiguration. Unlike initial setup, empty values are preserved
+        to allow clearing previously configured options.
+
+        Args:
+            user_input: The user input from the options form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or updating the entry.
+
+        """
+        entry = self._get_reconfigure_entry()
+        device_name = self.device_name or ""
+
+        if user_input is not None:
+            # Check which optional sensor entities need to be removed
+            await self._cleanup_removed_entities(entry, entry.options, user_input)
+
+            # During reconfiguration, preserve empty values so users can clear
+            # previously configured entity sources. The sensor platform will
+            # skip entity creation for any empty/falsy values.
+            updated_data = {
+                CONF_NAME: device_name,
+                CONF_TEMPERATURES: self.temperature_settings,
+            }
+
+            return self.async_update_reload_and_abort(
+                entry,
+                data=updated_data,
+                options=user_input,
+            )
+
+        # Show options form for entity reconfiguration
+        return self.async_show_form(
+            step_id="reconfigure_entities",
+            data_schema=get_options_schema(entry.options),
+            description_placeholders={"device_name": device_name},
+        )
+
+    async def _cleanup_removed_entities(
+        self,
+        entry: config_entries.ConfigEntry,
+        old_options: Mapping[str, Any],
+        new_options: Mapping[str, Any],
+    ) -> None:
+        """Remove entities whose source entity configuration was cleared."""
+        entity_registry = er.async_get(self.hass)
+
+        # Map of option keys to their entity key suffixes
+        sensor_mappings = {
+            "power_source_entity_id": "power_consumption",
+            "voltage_source_entity_id": "voltage",
+            "current_source_entity_id": "current",
+        }
+
+        for option_key, entity_key in sensor_mappings.items():
+            # If the option was previously set but is now empty/unset, remove the entity
+            if old_options.get(option_key) and not new_options.get(option_key):
+                # Get all entities for this config entry
+                entities = er.async_entries_for_config_entry(
+                    entity_registry,
+                    entry.entry_id,
+                )
+
+                # Find matching entity by unique_id pattern
+                for entity in entities:
+                    if entity.unique_id.endswith(entity_key):
+                        entity_registry.async_remove(entity.entity_id)
 
     def _map_exception_to_error(self, exception: Exception) -> str:
         """
@@ -197,6 +301,16 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         LOGGER.warning("Error in config flow: %s", exception)
         exception_name = type(exception).__name__
         return ERROR_MAP.get(exception_name, "unknown")
+
+    def _build_temperature_settings(self, data: dict[str, Any]) -> dict[str, float]:
+        """Extract temperature settings from user input."""
+
+        return {
+            CONF_NORMAL_TEMPERATURE: float(data[CONF_NORMAL_TEMPERATURE]),
+            CONF_ECO_TEMPERATURE: float(data[CONF_ECO_TEMPERATURE]),
+            CONF_MAX_TEMPERATURE: float(data[CONF_MAX_TEMPERATURE]),
+            CONF_HYSTERESIS: float(data[CONF_HYSTERESIS]),
+        }
 
 
 __all__ = ["UniversalWaterHeaterConfigFlowHandler"]

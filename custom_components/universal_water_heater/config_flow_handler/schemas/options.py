@@ -33,58 +33,48 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
 
     """
     defaults = defaults or {}
-    return vol.Schema(
-        {
-            vol.Optional(
-                "enable_debugging",
-                default=defaults.get("enable_debugging", DEFAULT_ENABLE_DEBUGGING),
-            ): selector.BooleanSelector(),
-            vol.Optional(
-                "custom_icon",
-                default=defaults.get("custom_icon", ""),
-            ): selector.IconSelector(),
-            vol.Optional(
-                "temperature_source_entity_id",
-                default=defaults.get("temperature_source_entity_id"),
-            ): selector.EntitySelector(
+
+    # Build schema dynamically to handle optional fields correctly
+    schema_dict = {
+        vol.Required(
+            "temperature_source_entity_id",
+            default=defaults.get("temperature_source_entity_id"),
+        ): selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain=["sensor"],
+            ),
+        ),
+        vol.Required(
+            "switch_source_entity_id",
+            default=defaults.get("switch_source_entity_id"),
+        ): selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain=["switch"],
+            ),
+        ),
+        vol.Optional(
+            "enable_debugging",
+            default=defaults.get("enable_debugging", DEFAULT_ENABLE_DEBUGGING),
+        ): selector.BooleanSelector(),
+        vol.Optional(
+            "custom_icon",
+            default=defaults.get("custom_icon", ""),
+        ): selector.IconSelector(),
+    }
+
+    # Add optional sensor fields without defaults to allow clearing
+    # Use suggested_value to show current value but allow clearing
+    for field in ["power_source_entity_id", "voltage_source_entity_id", "current_source_entity_id"]:
+        schema_dict[vol.Optional(field, description={"suggested_value": defaults.get(field, "")})] = (
+            selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=["sensor"],
+                    multiple=False,
                 ),
-            ),
-            vol.Optional(
-                "power_source_entity_id",
-                default=defaults.get("power_source_entity_id"),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["sensor"],
-                ),
-            ),
-            vol.Optional(
-                "voltage_source_entity_id",
-                default=defaults.get("voltage_source_entity_id"),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["sensor"],
-                ),
-            ),
-            vol.Optional(
-                "current_source_entity_id",
-                default=defaults.get("current_source_entity_id"),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["sensor"],
-                ),
-            ),
-            vol.Optional(
-                "switch_source_entity_id",
-                default=defaults.get("switch_source_entity_id"),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["switch"],
-                ),
-            ),
-        },
-    )
+            )
+        )
+
+    return vol.Schema(schema_dict)
 
 
 __all__ = [

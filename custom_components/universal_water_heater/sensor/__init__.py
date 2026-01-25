@@ -9,6 +9,7 @@ from homeassistant.components.sensor import SensorEntityDescription
 
 from .current import ENTITY_DESCRIPTIONS as CURRENT_DESCRIPTIONS, UniversalWaterHeaterCurrentSensor
 from .power import ENTITY_DESCRIPTIONS as POWER_DESCRIPTIONS, UniversalWaterHeaterPowerSensor
+from .status import ENTITY_DESCRIPTIONS as STATUS_DESCRIPTIONS, UniversalWaterHeaterStatusSensor
 from .temperature import ENTITY_DESCRIPTIONS as TEMPERATURE_DESCRIPTIONS, UniversalWaterHeaterTemperatureSensor
 from .voltage import ENTITY_DESCRIPTIONS as VOLTAGE_DESCRIPTIONS, UniversalWaterHeaterVoltageSensor
 
@@ -23,6 +24,7 @@ ENTITY_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     *POWER_DESCRIPTIONS,
     *TEMPERATURE_DESCRIPTIONS,
     *VOLTAGE_DESCRIPTIONS,
+    *STATUS_DESCRIPTIONS,
 )
 
 
@@ -32,23 +34,25 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    # Add current sensors
-    async_add_entities(
-        UniversalWaterHeaterCurrentSensor(
-            coordinator=entry.runtime_data.coordinator,
-            entity_description=entity_description,
+    # Conditionally add current sensors if configured
+    if entry.options.get("current_source_entity_id"):
+        async_add_entities(
+            UniversalWaterHeaterCurrentSensor(
+                coordinator=entry.runtime_data.coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in CURRENT_DESCRIPTIONS
         )
-        for entity_description in CURRENT_DESCRIPTIONS
-    )
-    # Add power sensors
-    async_add_entities(
-        UniversalWaterHeaterPowerSensor(
-            coordinator=entry.runtime_data.coordinator,
-            entity_description=entity_description,
+    # Conditionally add power sensors if configured
+    if entry.options.get("power_source_entity_id"):
+        async_add_entities(
+            UniversalWaterHeaterPowerSensor(
+                coordinator=entry.runtime_data.coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in POWER_DESCRIPTIONS
         )
-        for entity_description in POWER_DESCRIPTIONS
-    )
-    # Add temperature sensors
+    # Always add temperature sensors (required)
     async_add_entities(
         UniversalWaterHeaterTemperatureSensor(
             coordinator=entry.runtime_data.coordinator,
@@ -56,11 +60,20 @@ async def async_setup_entry(
         )
         for entity_description in TEMPERATURE_DESCRIPTIONS
     )
-    # Add voltage sensors
+    # Conditionally add voltage sensors if configured
+    if entry.options.get("voltage_source_entity_id"):
+        async_add_entities(
+            UniversalWaterHeaterVoltageSensor(
+                coordinator=entry.runtime_data.coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in VOLTAGE_DESCRIPTIONS
+        )
+    # Always add status sensor
     async_add_entities(
-        UniversalWaterHeaterVoltageSensor(
+        UniversalWaterHeaterStatusSensor(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
         )
-        for entity_description in VOLTAGE_DESCRIPTIONS
+        for entity_description in STATUS_DESCRIPTIONS
     )

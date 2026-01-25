@@ -161,6 +161,83 @@ Platform entities inherit from both:
 │  Config Entry   │ ← Created by config flow
 └────────┬────────┘
          │
+         ├─── entry.data (immutable) ──────┐
+         │    • Device name                 │
+         │    • Temperatures (N/E/Max)      │
+         │    • Hysteresis                  │
+         │                                  │
+         └─── entry.options (mutable) ─────┐
+              • Temperature source entity   │
+              • Switch source entity       │
+              • Power source entity        │ (optional)
+              • Voltage source entity      │ (optional)
+              • Current source entity      │ (optional)
+              • Debug/icon settings        │
+         │                                  │
+         ▼                                  │
+┌─────────────────┐                        │
+│   Coordinator   │◄───────────────────────┘ (reads config for API calls)
+└────────┬────────┘ ← Fetches data from API every 1 hour
+         │
+         ▼
+    ┌────┴────┐
+    │  Data   │ ← Stored in coordinator.data
+    └────┬────┘
+         │
+    ┌────┴────────────────┐
+    │                     │
+    ▼                     ▼
+┌─────────┐         ┌─────────┐
+│ Sensor  │         │ Switch  │ ← Entities read from coordinator
+│(linked) │         │(linked) │   and entry.options
+└─────────┘         └─────────┘
+```
+
+## Configuration Data Structure
+
+### entry.data (Device Configuration)
+
+Immutable device settings set during initial setup:
+
+```python
+{
+    "name": "My Water Heater",
+    "temperatures": {
+        "normal_temperature": 65.0,
+        "eco_temperature": 55.0,
+        "max_temperature": 75.0,
+        "hysteresis": 4.0
+    }
+}
+```
+
+**Rationale:** Immutable because changing these affects device behavior in ways that need careful consideration. Users reconfigure this via reconfigure flow, which triggers full reload.
+
+### entry.options (Entity Source Configuration)
+
+Mutable settings for entity linking and behavior:
+
+```python
+{
+    "temperature_source_entity_id": "sensor.living_room_temperature",
+    "switch_source_entity_id": "switch.heater_relay",
+    "power_source_entity_id": "sensor.power_meter",  # Optional
+    "voltage_source_entity_id": "sensor.voltage",      # Optional
+    "current_source_entity_id": "sensor.current",      # Optional
+    "enable_debugging": False,
+    "custom_icon": "mdi:water-heater"
+}
+```
+
+**Rationale:** Mutable settings that can change without affecting device configuration. EntitySelector fields allow empty strings for optional entities. When an optional entity source is cleared (set to empty string), the corresponding sensor entity is removed via entity registry cleanup.
+
+## Data Flow
+
+```text
+┌─────────────────┐
+│  Config Entry   │ ← Created by config flow
+└────────┬────────┘
+         │
          ▼
 ┌─────────────────┐
 │   Coordinator   │ ← Fetches data from API every 5 min

@@ -39,25 +39,32 @@ After installation, add the integration:
 3. Search for "Universal Water Heater"
 4. Follow the configuration steps:
 
-### Step 1: Enter Device Name
+### Step 1: Device Configuration
 
-Enter a friendly name for your device:
+Enter device information and required settings:
 
-- **Device Name:** A descriptive name for this integration instance
+- **Device Name:** A descriptive name for this integration instance (required)
+- **Normal Temperature:** Set point for normal mode (40-80°C, default 65°C)
+- **Eco Temperature:** Set point for eco mode (40-80°C, default 55°C)
+- **Maximum Temperature:** Maximum allowed temperature (50-85°C, default 75°C)
+- **Hysteresis:** Temperature difference for switching modes (0.1-5°C, default 4°C)
 
 Click **Submit** to proceed.
 
 ### Step 2: Configure Entity Sources
 
-Configure which entities provide data for your device (optional):
+Link entities that provide data for your device:
 
+**Required:**
 - **Water Temperature Source:** Select a temperature entity to track water temperature
+- **Heater Switch Source:** Select a switch to mirror and control
+
+**Optional (can be configured later or left empty):**
 - **Power Source:** Select a power consumption entity
 - **Voltage Source:** Select a voltage entity
 - **Current Source:** Select a current entity
-- **Heater Switch Source:** Select a switch to mirror and control
 
-All fields are optional and can be configured later. Click **Submit** to complete setup.
+You can skip optional fields if you don't have those sensors available. They can be added or removed later by reconfiguring the integration. Click **Submit** to complete setup.
 
 ## What Gets Created
 
@@ -75,25 +82,20 @@ After successful setup, the integration creates:
 The integration creates the following entity types:
 
 #### Sensors
-- Water Temperature (linked to source entity)
-- Power Consumption (linked to source entity)
-- Voltage (linked to source entity)
-- Current (linked to source entity)
+- **Water Temperature** - Current water temperature (linked to source entity)
+- **Power Consumption** - Current power usage (linked to source entity, optional)
+- **Voltage** - Current voltage (linked to source entity, optional)
+- **Current** - Current amperage (linked to source entity, optional)
+- **Status** - Device status with configuration details as attributes
 
 #### Binary Sensors
-- API Connectivity status
+- **API Connectivity** - Status of integration connectivity
 
 #### Switches
-- Heater Switch (linked to source entity, bidirectional)
+- **Heater Switch** - Mirror and control the heater (linked to source entity, bidirectional)
 
 #### Select
-- Mode (Normal, Optimised, Eco, Off)
-
-#### Numbers
-- Temperature (Normal) - 40-80°C, default 65°C
-- Temperature (Eco) - 40-80°C, default 55°C
-- Temperature (Max) - 50-85°C, default 75°C
-- Hysteresis - 0.1-5°C, default 4°C
+- **Mode** - Operating mode selection (Normal, Optimised, Eco, Off)
 
 ## First Steps
 
@@ -113,12 +115,11 @@ type: entities
 title: Universal Water Heater
 entities:
   - sensor.device_name_water_temperature
-  - sensor.device_name_power
+  - sensor.device_name_power_consumption
   - sensor.device_name_voltage
   - sensor.device_name_current
+  - sensor.device_name_status
   - select.device_name_mode
-  - number.device_name_normal_temperature
-  - number.device_name_eco_temperature
   - switch.device_name_heater_switch
 ```
 

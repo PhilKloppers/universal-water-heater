@@ -13,36 +13,44 @@ These options are configured during initial setup via the Home Assistant UI.
 | Option | Type | Required | Default | Description |
 |--------|------|----------|---------|-------------|
 | **Device Name** | string | Yes | - | Friendly name for the integration instance |
+| **Normal Temperature** | float | Yes | 65.0 | Target temperature for normal mode (40-80°C) |
+| **Eco Temperature** | float | Yes | 55.0 | Target temperature for eco mode (40-80°C) |
+| **Maximum Temperature** | float | Yes | 75.0 | Maximum allowed temperature (50-85°C) |
+| **Hysteresis** | float | Yes | 4.0 | Temperature difference for switching (0.1-5°C) |
 
 #### Entity Source Configuration
 
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
-| **Water Temperature Source** | entity_id | No | Sensor entity providing temperature reading |
-| **Power Source** | entity_id | No | Sensor entity providing power consumption |
-| **Voltage Source** | entity_id | No | Sensor entity providing voltage |
-| **Current Source** | entity_id | No | Sensor entity providing current (amperage) |
-| **Heater Switch Source** | entity_id | No | Switch entity for the heater switch to mirror |
+| **Water Temperature Source** | entity_id | Yes | Sensor entity providing temperature reading |
+| **Heater Switch Source** | entity_id | Yes | Switch entity for the heater switch to mirror |
+| **Power Source** | entity_id | No | Sensor entity providing power consumption (optional) |
+| **Voltage Source** | entity_id | No | Sensor entity providing voltage (optional) |
+| **Current Source** | entity_id | No | Sensor entity providing current (amperage) (optional) |
 
 ### Options Flow (Reconfiguration)
 
-After initial setup, you can modify settings:
+After initial setup, you can modify entity source configuration and other settings:
 
 1. Go to **Settings** → **Devices & Services**
 2. Find "Universal Water Heater"
-3. Click **Configure**
+3. Click **Configure** to reconfigure device settings or reconfigure entity sources
 4. Modify settings
 5. Click **Submit**
 
-**Available options:**
+**Device Settings (available during reconfiguration):**
+- Device name
+- Normal, eco, and maximum temperatures
+- Hysteresis value
 
-- Enable debugging
-- Custom icon
-- Temperature entity source
-- Power entity source
-- Voltage entity source
-- Current entity source
-- Switch entity source
+**Entity Source Configuration (available during reconfiguration):**
+- Water temperature entity source (can be changed)
+- Heater switch entity source (can be changed)
+- Power entity source (can be added, changed, or removed)
+- Voltage entity source (can be added, changed, or removed)
+- Current entity source (can be added, changed, or removed)
+
+When you clear an optional power/voltage/current entity source, the corresponding entity will be automatically removed from Home Assistant.
 
 ## Entity Configuration
 
