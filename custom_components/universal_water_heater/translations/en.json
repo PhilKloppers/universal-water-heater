@@ -4,34 +4,73 @@
       "user": {
         "description": "If you need help with the configuration have a look here: https://github.com/PhilKloppers/universal-water-heater",
         "data": {
-          "name": "Device Name"
+          "name": "Device Name",
+          "normal_temperature": "Target Temperature (Normal)",
+          "eco_temperature": "Target Temperature (Eco)",
+          "max_temperature": "Maximum Temperature",
+          "hysteresis": "Hysteresis"
+        },
+        "data_description": {
+          "name": "A friendly name for your water heater device",
+          "normal_temperature": "Target temperature for Normal heating mode",
+          "eco_temperature": "Target temperature for Eco heating mode (must be ≤ Normal temperature)",
+          "max_temperature": "Maximum safe temperature limit",
+          "hysteresis": "Temperature difference to prevent rapid on/off cycling"
         }
       },
       "reconfigure": {
         "description": "Update the device name for this integration.",
         "data": {
-          "name": "Device Name"
+          "name": "Device Name",
+          "normal_temperature": "Target Temperature (Normal)",
+          "eco_temperature": "Target Temperature (Eco)",
+          "max_temperature": "Maximum Temperature",
+          "hysteresis": "Hysteresis"
+        },
+        "data_description": {
+          "name": "A friendly name for your water heater device",
+          "normal_temperature": "Target temperature for Normal heating mode",
+          "eco_temperature": "Target temperature for Eco heating mode (must be ≤ Normal temperature)",
+          "max_temperature": "Maximum safe temperature limit",
+          "hysteresis": "Temperature difference to prevent rapid on/off cycling"
         }
       },
       "configure_entities": {
-        "description": "Configure which entities provide data for your water heater device. All fields are optional and can be configured later.",
+        "title": "Required Entity Sources",
+        "description": "Configure the required entity sources for your water heater.",
         "data": {
-          "enable_debugging": "Enable debug logging",
-          "custom_icon": "Custom icon (optional)",
           "temperature_source_entity_id": "Water Temperature Source",
-          "power_source_entity_id": "Power Consumption Source",
-          "voltage_source_entity_id": "Voltage Source",
-          "current_source_entity_id": "Current Source",
           "switch_source_entity_id": "Switch Source"
         },
         "data_description": {
-          "enable_debugging": "Enable detailed debug logging for troubleshooting",
-          "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
           "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
+          "switch_source_entity_id": "Select the switch entity to control"
+        }
+      },
+      "configure_advanced": {
+        "title": "Advanced Settings",
+        "description": "Configure advanced options for debugging and customization.",
+        "data": {
+          "enable_debugging": "Enable debug logging",
+          "custom_icon": "Custom icon (optional)"
+        },
+        "data_description": {
+          "enable_debugging": "Enable detailed debug logging for troubleshooting",
+          "custom_icon": "Override the default icon for entities (optional, leave blank for default)"
+        }
+      },
+      "configure_optional": {
+        "title": "Optional Sensor Sources",
+        "description": "Configure optional sensor sources for power monitoring. Leave blank to skip.",
+        "data": {
+          "power_source_entity_id": "Power Consumption Source (optional)",
+          "voltage_source_entity_id": "Voltage Source (optional)",
+          "current_source_entity_id": "Current Source (optional)"
+        },
+        "data_description": {
           "power_source_entity_id": "Select the entity that provides power consumption data",
           "voltage_source_entity_id": "Select the entity that provides voltage data",
-          "current_source_entity_id": "Select the entity that provides current (amperage) data",
-          "switch_source_entity_id": "Select the switch entity to control"
+          "current_source_entity_id": "Select the entity that provides current (amperage) data"
         }
       }
     },
@@ -47,25 +86,41 @@
   "options": {
     "step": {
       "init": {
-        "title": "Configure Integration Options",
-        "description": "Customize how this integration operates.",
+        "title": "Required Entity Sources",
+        "description": "Configure the required entity sources for your water heater.",
         "data": {
-          "enable_debugging": "Enable debug logging",
-          "custom_icon": "Custom icon (optional)",
           "temperature_source_entity_id": "Water Temperature Source",
-          "power_source_entity_id": "Power Consumption Source",
-          "voltage_source_entity_id": "Voltage Source",
-          "current_source_entity_id": "Current Source",
           "switch_source_entity_id": "Switch Source"
         },
         "data_description": {
-          "enable_debugging": "Enable detailed debug logging for troubleshooting",
-          "custom_icon": "Override the default icon for entities (optional)",
           "temperature_source_entity_id": "Select the entity that provides the water temperature reading",
+          "switch_source_entity_id": "Select the switch entity to control"
+        }
+      },
+      "advanced": {
+        "title": "Advanced Settings",
+        "description": "Configure advanced options for debugging and customization.",
+        "data": {
+          "enable_debugging": "Enable debug logging",
+          "custom_icon": "Custom icon (optional)"
+        },
+        "data_description": {
+          "enable_debugging": "Enable detailed debug logging for troubleshooting",
+          "custom_icon": "Override the default icon for entities (optional, leave blank for default)"
+        }
+      },
+      "optional": {
+        "title": "Optional Sensor Sources",
+        "description": "Configure optional sensor sources for power monitoring. Leave blank to skip.",
+        "data": {
+          "power_source_entity_id": "Power Consumption Source (optional)",
+          "voltage_source_entity_id": "Voltage Source (optional)",
+          "current_source_entity_id": "Current Source (optional)"
+        },
+        "data_description": {
           "power_source_entity_id": "Select the entity that provides power consumption data",
           "voltage_source_entity_id": "Select the entity that provides voltage data",
-          "current_source_entity_id": "Select the entity that provides current (amperage) data",
-          "switch_source_entity_id": "Select the switch entity to control"
+          "current_source_entity_id": "Select the entity that provides current (amperage) data"
         }
       }
     }

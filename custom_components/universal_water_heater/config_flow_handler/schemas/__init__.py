@@ -24,11 +24,19 @@ from custom_components.universal_water_heater.config_flow_handler.schemas.config
     get_reconfigure_schema,
     get_user_schema,
 )
-from custom_components.universal_water_heater.config_flow_handler.schemas.options import get_options_schema
+from custom_components.universal_water_heater.config_flow_handler.schemas.options import (
+    get_options_advanced_schema,
+    get_options_optional_schema,
+    get_options_required_schema,
+    get_options_schema,
+)
 
 # Re-export all schemas for convenient imports
 
 __all__ = [
+    "get_options_advanced_schema",
+    "get_options_optional_schema",
+    "get_options_required_schema",
     "get_options_schema",
     "get_reconfigure_schema",
     "get_user_schema",
