@@ -6,7 +6,7 @@ Subentry flows allow users to add multiple "sub-configurations" under a single
 config entry.
 
 Example use case:
-- Weather integration: Main entry for API credentials, subentries for locations
+- Weather integration: Main entry for account, subentries for locations
 - Multi-device integration: Main entry for hub/account, subentries for devices
 
 This file is currently a template/example. Uncomment and adapt when implementing

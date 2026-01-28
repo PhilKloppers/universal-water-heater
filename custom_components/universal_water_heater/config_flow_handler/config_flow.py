@@ -136,7 +136,7 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         """
         Handle reconfiguration of the integration.
 
-        Allows users to update their credentials without removing and re-adding
+        Allows users to update their configuration without removing and re-adding
         the integration.
 
         Args:

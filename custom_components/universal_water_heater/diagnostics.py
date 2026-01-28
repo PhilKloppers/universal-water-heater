@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.redact import async_redact_data
 
@@ -19,10 +18,6 @@ if TYPE_CHECKING:
 
 # Fields to redact from diagnostics - CRITICAL for security!
 TO_REDACT = {
-    CONF_PASSWORD,
-    CONF_USERNAME,
-    "username",
-    "password",
     "api_key",
     "token",
 }

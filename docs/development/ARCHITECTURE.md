@@ -176,8 +176,8 @@ Platform entities inherit from both:
          │                                  │
          ▼                                  │
 ┌─────────────────┐                        │
-│   Coordinator   │◄───────────────────────┘ (reads config for API calls)
-└────────┬────────┘ ← Fetches data from API every 1 hour
+│   Coordinator   │◄───────────────────────┘ (reads config from linked entities)
+└────────┬────────┘ ← Aggregates data from linked entities every 1 hour
          │
          ▼
     ┌────┴────┐
@@ -240,7 +240,7 @@ Mutable settings for entity linking and behavior:
          │
          ▼
 ┌─────────────────┐
-│   Coordinator   │ ← Fetches data from API every 5 min
+│   Coordinator   │ ← Aggregates data from linked entities
 └────────┬────────┘
          │
          ▼

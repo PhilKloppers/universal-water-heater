@@ -241,7 +241,7 @@ If the integration fails to load:
 3. Go to **Settings** → **Devices & Services** and click **Reconfigure**
 2. Find **Universal Water Heater**
 3. Click the **3 dots menu** → **Reconfigure**
-4. Enter new username/password
+4. Update configuration as needed
 5. Click Submit
 
 #### Connection Status
@@ -249,9 +249,8 @@ If the integration fails to load:
 Monitor your connection status with the **API Connection** binary sensor:
 
 - **On** (Connected): Integration is receiving data normally
-- **Off** (Disconnected): Connection lost or authentication failed
+- **Off** (Disconnected): Connection lost
   - Check the binary sensor attributes for diagnostic information
-  - Verify credentials if authentication failed
   - Check network connectivity
 
 ### Enable Debug Logging
