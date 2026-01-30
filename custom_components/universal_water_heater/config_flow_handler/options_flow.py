@@ -15,6 +15,7 @@ from typing import Any
 
 from custom_components.universal_water_heater.config_flow_handler.schemas import (
     get_options_advanced_schema,
+    get_options_battery_schema,
     get_options_optional_schema,
     get_options_required_schema,
 )
@@ -31,8 +32,9 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
 
     Flow steps:
     1. init: Required options (temperature source, switch source)
-    2. advanced: Advanced options (debugging, custom icon)
-    3. optional: Optional sensors (power, voltage, current)
+    2. advanced: Advanced options (debugging, custom icon, battery-aware)
+    3. battery: Battery configuration (shown only if battery-aware is enabled)
+    4. optional: Optional sensors (power, voltage, current)
 
     For more information:
     https://developers.home-assistant.io/docs/config_entries_options_flow_handler
@@ -76,11 +78,12 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """
-        Handle advanced options (step 2 of 3).
+        Handle advanced options (step 2 of 4 or 3).
 
         This step collects advanced configuration:
         - Enable debugging
         - Custom icon
+        - Battery-aware option
 
         Args:
             user_input: The user input from the options form, or None for initial display.
@@ -90,8 +93,14 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
 
         """
         if user_input is not None:
-            # Store advanced options and proceed to optional sensors
+            # Store advanced options
             self._options.update(user_input)
+
+            # If battery-aware is enabled, proceed to battery configuration
+            if user_input.get("battery_aware", False):
+                return await self.async_step_battery()
+
+            # Otherwise proceed directly to optional sensors
             return await self.async_step_optional()
 
         return self.async_show_form(
@@ -99,12 +108,52 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
             data_schema=get_options_advanced_schema(self.config_entry.options),
         )
 
+    async def async_step_battery(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle battery configuration (step 3 of 4).
+
+        This step collects battery-aware configuration:
+        - Battery threshold percentage (stop heating below this)
+        - Battery resume threshold (resume heating above this)
+        - Battery SoC sensor entity
+
+        Args:
+            user_input: The user input from the options form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or proceeding to next step.
+
+        """
+        errors = {}
+
+        if user_input is not None:
+            # Validate that resume threshold is higher than stop threshold
+            battery_threshold = user_input.get("battery_threshold", 20)
+            battery_resume_threshold = user_input.get("battery_resume_threshold", 35)
+
+            if battery_resume_threshold <= battery_threshold:
+                errors["battery_resume_threshold"] = "resume_threshold_too_low"
+
+            if not errors:
+                # Store battery options and proceed to optional sensors
+                self._options.update(user_input)
+                return await self.async_step_optional()
+
+        return self.async_show_form(
+            step_id="battery",
+            data_schema=get_options_battery_schema(self.config_entry.options),
+            errors=errors,
+        )
+
     async def async_step_optional(
         self,
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """
-        Handle optional sensors (step 3 of 3).
+        Handle optional sensors (step 4 of 4, or step 3 if battery step skipped).
 
         This step collects optional sensor entity sources:
         - Power source entity

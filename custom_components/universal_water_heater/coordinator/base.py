@@ -40,6 +40,11 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
 
     config_entry: UniversalWaterHeaterConfigEntry
 
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize the coordinator."""
+        super().__init__(*args, **kwargs)
+        self._temperature_monitor = None
+
     async def _async_setup(self) -> None:
         """
         Set up the coordinator.
@@ -53,6 +58,13 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
         This runs before the first data fetch, ensuring any required setup
         is complete before entities start requesting data.
         """
+        # Set up temperature monitoring for real-time response
+        from custom_components.universal_water_heater.coordinator.temperature_monitor import (  # noqa: PLC0415
+            async_setup_temperature_monitoring,
+        )
+
+        self._temperature_monitor = await async_setup_temperature_monitoring(self)
+
         # Example: Fetch device info once at startup
         # device_info = await self.config_entry.runtime_data.client.get_device_info()
         # self._device_id = device_info["id"]
@@ -105,6 +117,9 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
             #     "switch_state": self.hass.states.get("switch.source_heater"),
             # }
 
+            # Run control logic evaluation during data update
+            # We'll implement this as a service call later
+
             # For now, return empty dict - entities will handle their own state
             return {}
         except Exception as exception:
@@ -114,3 +129,9 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
                 translation_key="update_failed",
             ) from exception
             return await self.config_entry.runtime_data.client.async_get_data()
+
+    async def async_shutdown(self) -> None:
+        """Shut down the coordinator and clean up resources."""
+        if self._temperature_monitor:
+            self._temperature_monitor.stop_monitoring()
+        await super().async_shutdown()

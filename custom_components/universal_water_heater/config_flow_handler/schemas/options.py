@@ -17,7 +17,12 @@ from typing import Any
 
 import voluptuous as vol
 
-from custom_components.universal_water_heater.const import DEFAULT_ENABLE_DEBUGGING
+from custom_components.universal_water_heater.const import (
+    DEFAULT_BATTERY_AWARE,
+    DEFAULT_BATTERY_RESUME_THRESHOLD,
+    DEFAULT_BATTERY_THRESHOLD,
+    DEFAULT_ENABLE_DEBUGGING,
+)
 from homeassistant.helpers import selector
 
 
@@ -62,7 +67,8 @@ def get_options_advanced_schema(defaults: Mapping[str, Any] | None = None) -> vo
     """
     Get schema for advanced options (step 2 of 3).
 
-    Collects advanced configuration settings like debugging and custom icons.
+    Collects advanced configuration settings like debugging, custom icons,
+    and battery-aware features.
 
     Args:
         defaults: Optional dictionary of current option values.
@@ -83,6 +89,66 @@ def get_options_advanced_schema(defaults: Mapping[str, Any] | None = None) -> vo
                 "custom_icon",
                 default=defaults.get("custom_icon", ""),
             ): selector.IconSelector(),
+            vol.Optional(
+                "battery_aware",
+                default=defaults.get("battery_aware", DEFAULT_BATTERY_AWARE),
+            ): selector.BooleanSelector(),
+        }
+    )
+
+
+def get_options_battery_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
+    """
+    Get schema for battery-aware options (step 2b of 3).
+
+    This schema is shown when battery_aware is enabled and collects:
+    - Battery threshold percentage
+    - Battery SoC entity selector
+
+    Args:
+        defaults: Optional dictionary of current option values.
+
+    Returns:
+        Voluptuous schema for battery configuration.
+
+    """
+    defaults = defaults or {}
+
+    return vol.Schema(
+        {
+            vol.Optional(
+                "battery_threshold",
+                default=defaults.get("battery_threshold", DEFAULT_BATTERY_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5,
+                    max=95,
+                    step=1,
+                    unit_of_measurement="%",
+                    mode=selector.NumberSelectorMode.SLIDER,
+                ),
+            ),
+            vol.Optional(
+                "battery_resume_threshold",
+                default=defaults.get("battery_resume_threshold", DEFAULT_BATTERY_RESUME_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=10,
+                    max=100,
+                    step=1,
+                    unit_of_measurement="%",
+                    mode=selector.NumberSelectorMode.SLIDER,
+                ),
+            ),
+            vol.Optional(
+                "battery_soc_entity_id",
+                default=defaults.get("battery_soc_entity_id"),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sensor"],
+                    device_class=["battery"],
+                ),
+            ),
         }
     )
 

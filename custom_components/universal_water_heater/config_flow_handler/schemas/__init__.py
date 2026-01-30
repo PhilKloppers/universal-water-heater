@@ -26,6 +26,7 @@ from custom_components.universal_water_heater.config_flow_handler.schemas.config
 )
 from custom_components.universal_water_heater.config_flow_handler.schemas.options import (
     get_options_advanced_schema,
+    get_options_battery_schema,
     get_options_optional_schema,
     get_options_required_schema,
     get_options_schema,
@@ -35,6 +36,7 @@ from custom_components.universal_water_heater.config_flow_handler.schemas.option
 
 __all__ = [
     "get_options_advanced_schema",
+    "get_options_battery_schema",
     "get_options_optional_schema",
     "get_options_required_schema",
     "get_options_schema",

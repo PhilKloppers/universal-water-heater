@@ -59,3 +59,7 @@ set_eco_temperature:
           max: 80
           step: 1
           unit_of_measurement: "°C"
+
+evaluate_control_logic:
+  name: Evaluate Control Logic
+  description: Manually trigger evaluation of temperature control logic and adjust heater state based on current conditions

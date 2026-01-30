@@ -22,6 +22,10 @@ Uncomment and customize these badges if you want to use them:
 
 - **Easy Setup**: Simple configuration through the UI - no YAML required
 - **Temperature Control**: Monitor water temperature with configurable target and eco modes
+- **Battery-Aware Heating**: Automatically pause heating when battery SoC is low (configurable thresholds)
+- **Real-Time Monitoring**: Temperature and battery monitoring with immediate response to every 0.1°C or 0.1% change
+- **Entity Availability Monitoring**: Automatic error detection when linked entities become unavailable
+- **Safety Protection**: Automatic heater shutoff on overtemperature or entity unavailability with automatic recovery
 - **Power Monitoring**: Track power consumption, voltage, and current in real-time
 - **Smart Modes**: Select between Normal, Optimised, Eco, or Off operating modes
 - **Thermostat Control**: Configure temperature settings with hysteresis for precise control
@@ -33,11 +37,12 @@ Uncomment and customize these badges if you want to use them:
 
 Platform | Description
 -- | --
-`sensor` | Water temperature, power, voltage, and current (linked to external entities)
+`sensor` | Water temperature, power, voltage, current (linked entities), and status sensor with configuration attributes
 `binary_sensor` | API connectivity status
 `switch` | Heater switch (linked to external switch entity)
 `select` | Operating mode selection (Normal, Optimised, Eco, Off)
 `number` | Temperature control (normal, eco, maximum) and hysteresis settings
+`button` | Evaluate control logic on-demand
 
 > **💡 Interactive Demo**: The linked sensor and switch entities demonstrate real-time synchronization:
 >
@@ -135,6 +140,15 @@ Find all entities in **Settings** → **Devices & Services** → **Universal Wat
 - **Power**: Power consumption in watts (linked entity)
 - **Voltage**: Electrical voltage reading (linked entity)
 - **Current**: Electrical current (amperage) reading (linked entity)
+- **Status**: Integration status with configuration attributes and automatic monitoring
+  - **States**: Normal, Overtemp, Error, Off
+  - **Normal**: System operating normally
+  - **Overtemp**: Temperature exceeded maximum - heater automatically turned off
+  - **Error**: One or more linked entities unavailable - heater automatically turned off for safety
+  - **Off**: Mode set to Off
+  - **Automatic Recovery**: Status recovers to Normal when temperature drops below normal temperature (from Overtemp) or when all entities become available (from Error)
+  - Attributes include: temperature targets, hysteresis, and battery thresholds (if battery-aware enabled)
+  - Useful for monitoring configuration and system health at a glance
 
 All sensor values are synchronized in real-time from their source entities.
 
@@ -177,6 +191,25 @@ All sensor values are synchronized in real-time from their source entities.
 ## Custom Services
 
 The integration provides services for automation and control:
+
+### `universal_water_heater.evaluate_control_logic`
+
+Manually trigger temperature and battery-based control logic evaluation.
+
+**Parameters:** None
+
+**Example:**
+
+```yaml
+service: universal_water_heater.evaluate_control_logic
+```
+
+**When to use:**
+- Test battery-aware heating behavior
+- Force immediate control logic check
+- Debug temperature or battery threshold configuration
+
+**Note:** Control logic runs automatically every minute and on state changes, so manual triggering is rarely needed.
 
 ### `universal_water_heater.set_target_temperature`
 
@@ -224,6 +257,10 @@ Name | Default | Description
 -- | -- | --
 Custom Icon | (empty) | Optional custom icon for the device
 Enable Debugging | Off | Enable extra debug logging
+Battery-Aware | Off | Enable battery-aware heating control
+Battery Stop Threshold | 20% | Turn off heater when battery SoC drops below this (if battery-aware enabled)
+Battery Resume Threshold | 35% | Resume heating when battery SoC rises above this (if battery-aware enabled)
+Battery SoC Entity | (optional) | Battery state of charge sensor entity (if battery-aware enabled)
 Water Temperature Entity | (optional) | Entity to track water temperature
 Power Entity | (optional) | Entity to track power consumption
 Voltage Entity | (optional) | Entity to track voltage

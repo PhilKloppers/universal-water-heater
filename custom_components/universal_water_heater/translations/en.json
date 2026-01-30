@@ -102,11 +102,27 @@
         "description": "Configure advanced options for debugging and customization.",
         "data": {
           "enable_debugging": "Enable debug logging",
-          "custom_icon": "Custom icon (optional)"
+          "custom_icon": "Custom icon (optional)",
+          "battery_aware": "Battery-aware heating"
         },
         "data_description": {
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
-          "custom_icon": "Override the default icon for entities (optional, leave blank for default)"
+          "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
+          "battery_aware": "Pause heating when battery state of charge is low"
+        }
+      },
+      "battery": {
+        "title": "Battery Configuration",
+        "description": "Configure battery-aware heating thresholds.",
+        "data": {
+          "battery_threshold": "Stop heating below",
+          "battery_resume_threshold": "Resume heating above",
+          "battery_soc_entity_id": "Battery SoC Entity"
+        },
+        "data_description": {
+          "battery_threshold": "Turn off heater when battery SoC drops below this percentage",
+          "battery_resume_threshold": "Resume heating when battery SoC rises above this percentage (must be higher than stop threshold)",
+          "battery_soc_entity_id": "Select the battery state of charge sensor entity"
         }
       },
       "optional": {
@@ -123,6 +139,12 @@
           "current_source_entity_id": "Select the entity that provides current (amperage) data"
         }
       }
+    },
+    "error": {
+      "resume_threshold_too_low": "Resume threshold must be higher than stop threshold"
+    },
+    "abort": {
+      "reconfigure_successful": "Configuration updated successfully"
     }
   },
   "exceptions": {
