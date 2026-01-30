@@ -17,6 +17,9 @@ from typing import TYPE_CHECKING, Any
 from slugify import slugify
 
 from custom_components.universal_water_heater.config_flow_handler.schemas import (
+    get_options_advanced_schema,
+    get_options_optional_schema,
+    get_options_required_schema,
     get_options_schema,
     get_reconfigure_schema,
     get_user_schema,
@@ -69,6 +72,7 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         super().__init__()
         self.device_name: str | None = None
         self.temperature_settings: dict[str, float] = {}
+        self.entity_options: dict[str, Any] = {}
 
     @staticmethod
     def async_get_options_flow(
@@ -136,7 +140,7 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         """
         Handle reconfiguration of the integration.
 
-        Allows users to update their credentials without removing and re-adding
+        Allows users to update their configuration without removing and re-adding
         the integration.
 
         Args:
@@ -177,13 +181,74 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """
-        Handle entity configuration after initial device setup.
+        Handle required entity configuration after initial device setup (step 1 of 3).
 
-        This step allows users to link source entities for water temperature,
-        power consumption, etc. immediately after adding the device.
+        This step collects the required entity sources:
+        - Temperature source entity
+        - Switch source entity
 
         Args:
-            user_input: The user input from the options form, or None for initial display.
+            user_input: The user input from the form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or proceeding to next step.
+
+        """
+        if user_input is not None:
+            # Store required entity options and proceed to advanced settings
+            self.entity_options.update(user_input)
+            return await self.async_step_configure_advanced()
+
+        # Show options form for required entity configuration
+        return self.async_show_form(
+            step_id="configure_entities",
+            data_schema=get_options_required_schema({}),
+            description_placeholders={"device_name": self.device_name or ""},
+        )
+
+    async def async_step_configure_advanced(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle advanced settings during initial setup (step 2 of 3).
+
+        This step collects advanced configuration:
+        - Enable debugging
+        - Custom icon
+
+        Args:
+            user_input: The user input from the form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or proceeding to next step.
+
+        """
+        if user_input is not None:
+            # Store advanced options and proceed to optional sensors
+            self.entity_options.update(user_input)
+            return await self.async_step_configure_optional()
+
+        return self.async_show_form(
+            step_id="configure_advanced",
+            data_schema=get_options_advanced_schema({}),
+            description_placeholders={"device_name": self.device_name or ""},
+        )
+
+    async def async_step_configure_optional(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle optional sensor configuration during initial setup (step 3 of 3).
+
+        This step collects optional sensor entity sources:
+        - Power source entity
+        - Voltage source entity
+        - Current source entity
+
+        Args:
+            user_input: The user input from the form, or None for initial display.
 
         Returns:
             The config flow result, either showing a form or creating the entry.
@@ -192,6 +257,9 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
         device_name = self.device_name or ""
 
         if user_input is not None:
+            # Merge all collected entity options
+            self.entity_options.update(user_input)
+
             # Pass all values as-is, including empty strings for optional fields.
             # The sensor platform will skip entity creation for any empty/falsy values.
             return self.async_create_entry(
@@ -200,14 +268,12 @@ class UniversalWaterHeaterConfigFlowHandler(config_entries.ConfigFlow, domain=DO
                     CONF_NAME: device_name,
                     CONF_TEMPERATURES: self.temperature_settings,
                 },
-                options=user_input,
+                options=self.entity_options,
             )
 
-        # Show options form for entity configuration
-        # Pass empty dict explicitly to avoid any state carryover
         return self.async_show_form(
-            step_id="configure_entities",
-            data_schema=get_options_schema({}),
+            step_id="configure_optional",
+            data_schema=get_options_optional_schema({}),
             description_placeholders={"device_name": device_name},
         )
 

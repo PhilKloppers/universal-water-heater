@@ -67,10 +67,17 @@ updates to all entities. It is organized as a package with separate modules for 
 - `data_processing.py` - Data validation, transformation, and caching utilities
 - `error_handling.py` - Error recovery strategies, retry logic, and circuit breaker patterns
 - `listeners.py` - Entity callbacks, event listeners, and performance monitoring
+- `temperature_monitor.py` - Real-time temperature and entity monitoring with automatic safety features
 
 **Core functionality:**
 
-- Fixed update interval (1 hour)
+- Real-time entity state monitoring via `async_track_state_change_event`
+- Entity availability monitoring with automatic error handling
+- Temperature change detection (responds to every 0.1°C change)
+- Battery SoC monitoring (responds to every 0.1% change)
+- Automatic status updates (Normal, Overtemp, Error)
+- Safety features: automatic heater shutoff on overtemperature or entity unavailability
+- Automatic recovery when conditions return to normal
 - Error handling with exponential backoff
 - Shared data access for all entities
 - Automatic retry on transient failures
@@ -139,6 +146,63 @@ Provides common functionality for all entities in the integration:
 
 **Key class:** `UniversalWaterHeaterEntity` (in `entity/base.py`)
 
+### Control Logic and Monitoring
+
+**Package:** `utils/control_logic.py` and `coordinator/temperature_monitor.py`
+
+The integration implements a sophisticated real-time monitoring and control system:
+
+**Control Logic (`utils/control_logic.py`):**
+
+- `WaterHeaterControlLogic`: Hysteresis-based temperature control
+- `async_evaluate_and_control_heater()`: Main control evaluation function
+- Hysteresis logic:
+  - Heater ON → turns OFF when temp ≥ target + hysteresis
+  - Heater OFF → turns ON when temp < target - hysteresis
+- Battery-aware heating with configurable thresholds
+- Entity availability validation before executing control logic
+- Safety overrides: overtemperature and unavailable entities always force heater OFF
+
+**Temperature Monitor (`coordinator/temperature_monitor.py`):**
+
+- `TemperatureMonitor`: Real-time entity state monitoring
+- Event-driven architecture using `async_track_state_change_event`
+- Monitors temperature sensor, switch entity, and battery SoC (if enabled)
+- Responds to every state change (no filtering thresholds):
+  - Temperature: responds to 0.1°C changes
+  - Battery SoC: responds to 0.1% changes
+- Entity availability monitoring with automatic error handling
+- Triggers control logic evaluation on state changes
+
+**Safety Features:**
+
+1. **Overtemperature Protection:**
+   - Automatically turns off heater when temperature ≥ max_temperature
+   - Sets status to "Overtemp"
+   - Automatic recovery to "Normal" when temp < normal_temperature
+   - User retains mode control but receives warnings
+
+2. **Entity Availability Monitoring:**
+   - Detects when any linked entity becomes unavailable/unknown
+   - Immediately turns off heater for safety
+   - Sets status to "Error"
+   - Automatic recovery to "Normal" when all entities become available
+   - Resumes normal operation after recovery
+
+3. **Battery-Aware Safety:**
+   - Pauses heating when battery SoC drops below threshold
+   - Resumes only when battery rises above resume threshold
+   - Prevents rapid cycling with hysteresis band
+
+**Status Sensor States:**
+
+- **Normal**: System operating normally
+- **Overtemp**: Temperature exceeded maximum
+- **Error**: One or more entities unavailable
+- **Off**: Mode set to Off
+
+All transitions are logged with appropriate severity levels (INFO for recovery, WARNING/ERROR for issues).
+
 ## Platform Organization
 
 Each platform (sensor, binary_sensor, switch, etc.) follows this pattern:
@@ -176,8 +240,8 @@ Platform entities inherit from both:
          │                                  │
          ▼                                  │
 ┌─────────────────┐                        │
-│   Coordinator   │◄───────────────────────┘ (reads config for API calls)
-└────────┬────────┘ ← Fetches data from API every 1 hour
+│   Coordinator   │◄───────────────────────┘ (reads config from linked entities)
+└────────┬────────┘ ← Aggregates data from linked entities every 1 hour
          │
          ▼
     ┌────┴────┐
@@ -240,7 +304,7 @@ Mutable settings for entity linking and behavior:
          │
          ▼
 ┌─────────────────┐
-│   Coordinator   │ ← Fetches data from API every 5 min
+│   Coordinator   │ ← Aggregates data from linked entities
 └────────┬────────┘
          │
          ▼

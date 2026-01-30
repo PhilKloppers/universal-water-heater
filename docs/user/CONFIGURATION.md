@@ -28,6 +28,41 @@ These options are configured during initial setup via the Home Assistant UI.
 | **Voltage Source** | entity_id | No | Sensor entity providing voltage (optional) |
 | **Current Source** | entity_id | No | Sensor entity providing current (amperage) (optional) |
 
+### Advanced Options
+
+These options are configured in the Options flow after initial setup.
+
+#### Battery-Aware Heating
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| **Battery-Aware** | boolean | No | False | Enable battery-aware heating control |
+| **Battery Stop Threshold** | float | No | 20.0 | Stop heating when battery SoC drops below this percentage (5-95%) |
+| **Battery Resume Threshold** | float | No | 35.0 | Resume heating when battery SoC rises above this percentage (10-100%, must be > stop threshold) |
+| **Battery SoC Entity** | entity_id | No | - | Battery state of charge sensor entity (required if battery-aware enabled) |
+
+**How Battery-Aware Heating Works:**
+
+When enabled, the heater will automatically pause heating when your battery state of charge drops below the configured stop threshold. Heating will only resume once the battery charges above the resume threshold. This prevents the heater from draining your battery during low-charge situations.
+
+The integration monitors battery SoC in real-time, responding to every 0.1% change for immediate reaction to battery conditions.
+
+**Example Scenario:**
+- Stop threshold: 20%
+- Resume threshold: 35%
+- Battery at 25% → Heater turns off at 20%
+- Battery charges to 32% → Heater stays off
+- Battery reaches 36% → Heater can turn on again
+
+This hysteresis prevents rapid on/off cycling around a single threshold.
+
+#### Debug Settings
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| **Enable Debug Logging** | boolean | No | False | Enable detailed debug logging for troubleshooting |
+| **Custom Icon** | string | No | (empty) | Override default icon for entities |
+
 ### Options Flow (Reconfiguration)
 
 After initial setup, you can modify entity source configuration and other settings:
@@ -92,9 +127,99 @@ If you don't need certain entities:
 
 Disabled entities won't update or consume resources.
 
+## Entities
+
+### Status Sensor
+
+The status sensor monitors the overall health and operating state of the system:
+
+**States:**
+
+- **Normal**: System operating normally within all parameters
+- **Overtemp**: Temperature exceeded maximum allowed temperature
+  - Heater is automatically turned off
+  - User is warned when attempting to change mode
+  - Status automatically recovers to Normal when temperature drops below normal temperature
+- **Error**: One or more linked entities are unavailable or unresponsive
+  - Heater is automatically turned off for safety
+  - Status automatically recovers to Normal when all entities become available
+- **Off**: Operating mode is set to Off
+
+**Attributes:**
+
+The status sensor provides the following attributes:
+
+- `normal_temperature`: Target temperature for Normal mode
+- `eco_temperature`: Target temperature for Eco mode
+- `max_temperature`: Maximum allowed temperature (safety limit)
+- `hysteresis`: Temperature differential for control logic
+- `battery_threshold`: Stop heating threshold (if battery-aware enabled)
+- `battery_resume_threshold`: Resume heating threshold (if battery-aware enabled)
+
+**Real-Time Monitoring:**
+
+The integration monitors all linked entities continuously:
+
+- Temperature changes trigger immediate control logic evaluation (every 0.1°C)
+- Battery SoC changes trigger immediate evaluation (every 0.1%)
+- Entity availability is checked on every state change
+- Control logic automatically turns off heater when:
+  - Temperature exceeds maximum temperature
+  - Any required entity becomes unavailable
+  - Battery SoC drops below threshold (if battery-aware enabled)
+
+**Automatic Recovery:**
+
+- From **Overtemp** → **Normal**: When temperature drops below normal temperature
+- From **Error** → **Normal**: When all linked entities become available again
+- Normal operation automatically resumes after recovery
+
+### Temperature Control Behavior
+
+**Hysteresis Control:**
+
+The integration uses hysteresis to prevent rapid on/off cycling:
+
+- **Heater ON**: Turns off when temperature reaches `target + hysteresis`
+- **Heater OFF**: Turns on when temperature drops below `target - hysteresis`
+
+**Example (Normal mode with target 65°C, hysteresis 4°C):**
+
+- Heater turns OFF at 69°C (65 + 4)
+- Heater turns ON at 61°C (65 - 4)
+- Provides 8°C total hysteresis band to prevent cycling
+
+**Safety Overrides:**
+
+- Overtemperature always forces heater OFF (cannot be overridden)
+- Entity unavailability always forces heater OFF (cannot be overridden)
+- User retains full control of mode selection even during safety conditions
+- Warnings are logged when mode changes during overtemperature
+
 ## Services
 
 The integration provides the following services:
+
+### `universal_water_heater.evaluate_control_logic`
+
+Manually trigger temperature and battery-based control logic evaluation.
+
+**Parameters:** None
+
+**Example:**
+
+```yaml
+service: universal_water_heater.evaluate_control_logic
+```
+
+**When to use:**
+
+- Test battery-aware heating behavior
+- Force immediate control logic check after configuration changes
+- Debug temperature or battery threshold configuration
+- Verify heater control in response to current conditions
+
+**Note:** Control logic runs automatically on every temperature change (0.1°C resolution) and battery state change (0.1% resolution), so manual triggering is typically only needed for testing or debugging. The integration also monitors entity availability continuously and automatically responds to unavailable entities.
 
 ### `universal_water_heater.set_target_temperature`
 

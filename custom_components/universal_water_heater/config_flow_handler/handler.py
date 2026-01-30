@@ -4,7 +4,7 @@ Config flow handler for universal_water_heater.
 This module provides backwards compatibility by re-exporting the flow handlers
 from their respective modules. The actual implementation is split across:
 
-- config_flow.py: Main config flow (user, reauth, reconfigure)
+- config_flow.py: Main config flow (user, reconfigure)
 - options_flow.py: Options flow for post-setup configuration
 - subentry_flow.py: Template for future subentry flows
 - schemas/: Voluptuous schemas for all forms

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from custom_components.universal_water_heater.api import UniversalWaterHeaterApiClientError
 from custom_components.universal_water_heater.const import LOGGER
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -29,7 +28,6 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
     updates to all entities. It manages:
     - Periodic data updates based on update_interval
     - Error handling and recovery
-    - Authentication failure detection and reauthentication triggers
     - Data distribution to all entities
     - Context-based data fetching (only fetch data for active entities)
 
@@ -41,6 +39,11 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
     """
 
     config_entry: UniversalWaterHeaterConfigEntry
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize the coordinator."""
+        super().__init__(*args, **kwargs)
+        self._temperature_monitor = None
 
     async def _async_setup(self) -> None:
         """
@@ -55,6 +58,13 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
         This runs before the first data fetch, ensuring any required setup
         is complete before entities start requesting data.
         """
+        # Set up temperature monitoring for real-time response
+        from custom_components.universal_water_heater.coordinator.temperature_monitor import (  # noqa: PLC0415
+            async_setup_temperature_monitoring,
+        )
+
+        self._temperature_monitor = await async_setup_temperature_monitoring(self)
+
         # Example: Fetch device info once at startup
         # device_info = await self.config_entry.runtime_data.client.get_device_info()
         # self._device_id = device_info["id"]
@@ -72,10 +82,6 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
         This allows optimizing API calls to only fetch data that's actually needed.
         For example, if only sensor entities are enabled, we can skip fetching switch data.
 
-        The API client uses the credentials from config_entry to authenticate:
-        - username: from config_entry.data["username"]
-        - password: from config_entry.data["password"]
-
         Expected API response structure (example):
         {
             "userId": 1,      # Used as device identifier
@@ -89,27 +95,43 @@ class UniversalWaterHeaterDataUpdateCoordinator(DataUpdateCoordinator):
         }
 
         Returns:
-            The data from the API as a dictionary.
+            A dictionary containing aggregated data from linked entities.
 
         Raises:
-            ConfigEntryAuthFailed: If authentication fails, triggers reauthentication.
-            UpdateFailed: If data fetching fails for other reasons, optionally with retry_after.
+            UpdateFailed: If data aggregation fails for any reason.
         """
         try:
-            # Optional: Get active entity contexts to optimize data fetching
+            # Optional: Get active entity contexts to optimize data processing
             # listening_contexts = set(self.async_contexts())
             # LOGGER.debug("Active entity contexts: %s", listening_contexts)
 
-            # Fetch data from API
-            # In production, you could pass listening_contexts to optimize the API call:
-            # return await self.config_entry.runtime_data.client.async_get_data(listening_contexts)
-            return await self.config_entry.runtime_data.client.async_get_data()
-        except UniversalWaterHeaterApiClientError as exception:
-            LOGGER.exception("Error communicating with API")
-            # If the API provides rate limit information, you can honor it:
-            # if hasattr(exception, 'retry_after'):
-            #     raise UpdateFailed(retry_after=exception.retry_after) from exception
+            # Aggregate data from linked entities
+            # In a real implementation, this would:
+            # 1. Read state from linked entities (temperature, power, etc.)
+            # 2. Process and validate the data
+            # 3. Return aggregated result
+            # Example:
+            # return {
+            #     "temperature": self.hass.states.get("sensor.source_temperature"),
+            #     "power": self.hass.states.get("sensor.source_power"),
+            #     "switch_state": self.hass.states.get("switch.source_heater"),
+            # }
+
+            # Run control logic evaluation during data update
+            # We'll implement this as a service call later
+
+            # For now, return empty dict - entities will handle their own state
+            return {}
+        except Exception as exception:
+            LOGGER.exception("Error aggregating entity data")
             raise UpdateFailed(
                 translation_domain="universal_water_heater",
                 translation_key="update_failed",
             ) from exception
+            return await self.config_entry.runtime_data.client.async_get_data()
+
+    async def async_shutdown(self) -> None:
+        """Shut down the coordinator and clean up resources."""
+        if self._temperature_monitor:
+            self._temperature_monitor.stop_monitoring()
+        await super().async_shutdown()

@@ -13,6 +13,17 @@ PARALLEL_UPDATES = 1
 # Default configuration values
 DEFAULT_ENABLE_DEBUGGING = False
 
+# Battery configuration keys
+CONF_BATTERY_AWARE = "battery_aware"
+CONF_BATTERY_THRESHOLD = "battery_threshold"
+CONF_BATTERY_RESUME_THRESHOLD = "battery_resume_threshold"
+CONF_BATTERY_SOC_ENTITY_ID = "battery_soc_entity_id"
+
+# Battery defaults
+DEFAULT_BATTERY_AWARE = False
+DEFAULT_BATTERY_THRESHOLD = 20
+DEFAULT_BATTERY_RESUME_THRESHOLD = 35  # Default: Resume at 35% (20% + 15%)
+
 # Temperature configuration keys
 CONF_TEMPERATURES = "temperatures"
 CONF_NORMAL_TEMPERATURE = "normal_temperature"

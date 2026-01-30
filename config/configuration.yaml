@@ -52,6 +52,45 @@ frontend:
   # themes: !include_dir_merge_named themes
 
 automation:
+  # Periodic evaluation - Run control logic every 1 minute for responsive control
+  - alias: "Universal Water Heater - Periodic Control Logic"
+    id: universal_water_heater_periodic_control
+    description: "Evaluate temperature control logic every minute for responsive control"
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"  # Every 1 minute for responsive control
+    action:
+      - service: universal_water_heater.evaluate_control_logic
+        data: {}
+    mode: single
+    max_exceeded: silent
+
+  # Temperature simulation - Increase when heater is on, decrease when off
+  - alias: "Temperature Simulator"
+    id: temperature_simulator
+    description: "Simulate temperature changes based on heater relay state"
+    trigger:
+      - platform: time_pattern
+        seconds: "/1"  # Every 1 second
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: switch.heater_relay
+                state: "on"
+            sequence:
+              - service: input_number.increment
+                target:
+                  entity_id: input_number.temperature
+          - conditions:
+              - condition: state
+                entity_id: switch.heater_relay
+                state: "off"
+            sequence:
+              - service: input_number.decrement
+                target:
+                  entity_id: input_number.temperature
+    mode: single
 
 script:
 
@@ -161,10 +200,17 @@ input_number:
   temperature:
     name: temperature
     icon: "mdi:settings-helper"
-    initial: 25
+    initial: 50
     min: 20
     max: 100
-    step: 1
+    step: 0.1
+  battery_soc:
+    name: battery_soc
+    icon: "mdi:settings-helper"
+    initial: 50
+    min: 0
+    max: 100
+    step: 0.1
 
 input_boolean:
   relay_helper:
@@ -197,6 +243,13 @@ template:
         unit_of_measurement: "°C"
         state: >
           {{ (states('input_number.temperature'))|float(0) }}
+      - name: "Battery SOC"
+        unique_id: "battery_soc_sensor"
+        icon: "mdi:code-brackets"
+        unit_of_measurement: "%"
+        device_class: "battery"
+        state: >
+          {{ (states('input_number.battery_soc'))|float(0) }}
   - switch:
       - name: "Heater Relay"
         unique_id: "heater_relay_switch"

@@ -56,15 +56,38 @@ Click **Submit** to proceed.
 Link entities that provide data for your device:
 
 **Required:**
+
 - **Water Temperature Source:** Select a temperature entity to track water temperature
 - **Heater Switch Source:** Select a switch to mirror and control
 
 **Optional (can be configured later or left empty):**
+
 - **Power Source:** Select a power consumption entity
 - **Voltage Source:** Select a voltage entity
 - **Current Source:** Select a current entity
 
 You can skip optional fields if you don't have those sensors available. They can be added or removed later by reconfiguring the integration. Click **Submit** to complete setup.
+
+### Step 3: Configure Advanced Options (Optional)
+
+Configure advanced features after initial setup by clicking **Configure**:
+
+**Debug Settings:**
+
+- **Enable Debug Logging:** Enable detailed logging for troubleshooting
+- **Custom Icon:** Override the default icon for entities
+
+**Battery-Aware Heating:**
+
+- **Battery-Aware:** Enable automatic heating pause when battery SoC is low
+  - When enabled, additional fields appear:
+  - **Battery Stop Threshold:** Stop heating below this percentage (default: 20%)
+  - **Battery Resume Threshold:** Resume heating above this percentage (default: 35%)
+  - **Battery SoC Entity:** Select your battery state of charge sensor
+
+**How Battery-Aware Works:**
+
+The heater will automatically turn off when your battery drops below the stop threshold and only resume when it charges above the resume threshold. This prevents battery drain during low-charge situations while avoiding rapid on/off cycling.
 
 ## What Gets Created
 

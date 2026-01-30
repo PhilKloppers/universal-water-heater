@@ -84,7 +84,7 @@ async def async_setup_entry(
     Set up this integration using UI.
 
     This is called when a config entry is loaded. It:
-    1. Creates the API client with credentials from the config entry
+    1. Creates the API client with device name from the config entry
     2. Initializes the DataUpdateCoordinator for data fetching
     3. Performs the first data refresh
     4. Sets up all platforms (sensors, switches, etc.)
@@ -95,11 +95,8 @@ async def async_setup_entry(
     1. User enters device name in config flow (config_flow.py)
     2. Device name stored in entry.data[CONF_NAME]
     3. API Client initialized with device name (api/client.py)
-    4. Coordinator fetches data using authenticated client (coordinator/base.py)
+    4. Coordinator fetches data from linked entities (coordinator/base.py)
     5. Entities access data via self.coordinator.data (sensor/, binary_sensor/, etc.)
-
-    This pattern ensures credentials from setup flow are used throughout
-    the integration's lifecycle for API communication.
 
     Args:
         hass: The Home Assistant instance.

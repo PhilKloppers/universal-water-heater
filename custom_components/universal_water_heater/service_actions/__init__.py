@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from custom_components.universal_water_heater.const import DOMAIN, LOGGER
+from custom_components.universal_water_heater.service_actions.evaluate_control_logic import async_evaluate_control_logic
 from custom_components.universal_water_heater.service_actions.example_service import (
     async_handle_example_action,
     async_handle_reload_data,
@@ -21,6 +22,7 @@ SERVICE_EXAMPLE_ACTION = "example_action"
 SERVICE_RELOAD_DATA = "reload_data"
 SERVICE_SET_TARGET_TEMPERATURE = "set_target_temperature"
 SERVICE_SET_ECO_TEMPERATURE = "set_eco_temperature"
+SERVICE_EVALUATE_CONTROL_LOGIC = "evaluate_control_logic"
 
 
 async def async_setup_services(hass: HomeAssistant) -> None:
@@ -84,6 +86,18 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         entry = entries[0]
         await async_set_eco_temperature(hass, entry, call)
 
+    async def handle_evaluate_control_logic(call: ServiceCall) -> None:
+        """Handle the evaluate_control_logic service call."""
+        # Find all config entries for this domain
+        entries = hass.config_entries.async_entries(DOMAIN)
+        if not entries:
+            LOGGER.warning("No config entries found for %s", DOMAIN)
+            return
+
+        # Use first entry (or implement logic to select specific entry)
+        entry = entries[0]
+        await async_evaluate_control_logic(hass, entry, call)
+
     # Register services (only once at component level)
     if not hass.services.has_service(DOMAIN, SERVICE_EXAMPLE_ACTION):
         hass.services.async_register(
@@ -111,6 +125,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             DOMAIN,
             SERVICE_SET_ECO_TEMPERATURE,
             handle_set_eco_temperature,
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_EVALUATE_CONTROL_LOGIC):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_EVALUATE_CONTROL_LOGIC,
+            handle_evaluate_control_logic,
         )
 
     LOGGER.debug("Services registered for %s", DOMAIN)
