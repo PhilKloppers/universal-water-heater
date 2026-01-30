@@ -2,7 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "description": "If you need help with the configuration have a look here: https://github.com/PhilKloppers/universal-water-heater",
+        "description": "If you need help with the configuration have a look [here]({documentation_url}).",
+        "description_placeholders": {
+          "documentation_url": "https://github.com/PhilKloppers/universal-water-heater"
+        },
         "data": {
           "name": "Device Name",
           "normal_temperature": "Target Temperature (Normal)",
