@@ -9,11 +9,17 @@ from custom_components.universal_water_heater.const import (
     CONF_BATTERY_AWARE,
     CONF_BATTERY_RESUME_THRESHOLD,
     CONF_BATTERY_THRESHOLD,
+    CONF_ECO_MODE_END,
+    CONF_ECO_MODE_START,
     CONF_ECO_TEMPERATURE,
     CONF_HYSTERESIS,
     CONF_MAX_TEMPERATURE,
+    CONF_NORMAL_MODE_END,
+    CONF_NORMAL_MODE_START,
     CONF_NORMAL_TEMPERATURE,
+    CONF_SUN_ANGLE,
     CONF_TEMPERATURES,
+    CONF_USE_SOLAR_CONTROL,
 )
 from custom_components.universal_water_heater.entity import UniversalWaterHeaterEntity
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
@@ -119,6 +125,23 @@ class UniversalWaterHeaterStatusSensor(SensorEntity, UniversalWaterHeaterEntity)
         if options.get(CONF_BATTERY_AWARE, False):
             attributes[CONF_BATTERY_THRESHOLD] = options.get(CONF_BATTERY_THRESHOLD)
             attributes[CONF_BATTERY_RESUME_THRESHOLD] = options.get(CONF_BATTERY_RESUME_THRESHOLD)
+
+        # Add optimised mode configuration based on selected control type
+        if options.get(CONF_USE_SOLAR_CONTROL, False):
+            # Solar control is enabled - add solar control attributes
+            attributes["optimised_control_type"] = "solar"
+            attributes[CONF_SUN_ANGLE] = options.get(CONF_SUN_ANGLE)
+        # Time-based control is enabled - add time range attributes
+        # Only add if any time-based configuration exists
+        elif any(
+            options.get(key)
+            for key in [CONF_NORMAL_MODE_START, CONF_NORMAL_MODE_END, CONF_ECO_MODE_START, CONF_ECO_MODE_END]
+        ):
+            attributes["optimised_control_type"] = "time_based"
+            attributes[CONF_NORMAL_MODE_START] = options.get(CONF_NORMAL_MODE_START)
+            attributes[CONF_NORMAL_MODE_END] = options.get(CONF_NORMAL_MODE_END)
+            attributes[CONF_ECO_MODE_START] = options.get(CONF_ECO_MODE_START)
+            attributes[CONF_ECO_MODE_END] = options.get(CONF_ECO_MODE_END)
 
         return attributes
 

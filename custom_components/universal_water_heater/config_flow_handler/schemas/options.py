@@ -22,6 +22,8 @@ from custom_components.universal_water_heater.const import (
     DEFAULT_BATTERY_RESUME_THRESHOLD,
     DEFAULT_BATTERY_THRESHOLD,
     DEFAULT_ENABLE_DEBUGGING,
+    DEFAULT_SUN_ANGLE,
+    DEFAULT_USE_SOLAR_CONTROL,
 )
 from homeassistant.helpers import selector
 
@@ -93,6 +95,10 @@ def get_options_advanced_schema(defaults: Mapping[str, Any] | None = None) -> vo
                 "battery_aware",
                 default=defaults.get("battery_aware", DEFAULT_BATTERY_AWARE),
             ): selector.BooleanSelector(),
+            vol.Optional(
+                "use_solar_control",
+                default=defaults.get("use_solar_control", DEFAULT_USE_SOLAR_CONTROL),
+            ): selector.BooleanSelector(),
         }
     )
 
@@ -147,6 +153,90 @@ def get_options_battery_schema(defaults: Mapping[str, Any] | None = None) -> vol
                 selector.EntitySelectorConfig(
                     domain=["sensor"],
                     device_class=["battery"],
+                ),
+            ),
+        }
+    )
+
+
+def get_options_time_based_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
+    """
+    Get schema for time-based optimized mode configuration.
+
+    This schema is shown when use_solar_control is disabled (default) and collects:
+    - Normal mode start time
+    - Normal mode end time
+    - Eco mode start time
+    - Eco mode end time
+
+    Args:
+        defaults: Optional dictionary of current option values.
+
+    Returns:
+        Voluptuous schema for time-based control configuration.
+
+    """
+    defaults = defaults or {}
+
+    return vol.Schema(
+        {
+            vol.Optional(
+                "normal_mode_start",
+                default=defaults.get("normal_mode_start"),
+            ): selector.TimeSelector(),
+            vol.Optional(
+                "normal_mode_end",
+                default=defaults.get("normal_mode_end"),
+            ): selector.TimeSelector(),
+            vol.Optional(
+                "eco_mode_start",
+                default=defaults.get("eco_mode_start"),
+            ): selector.TimeSelector(),
+            vol.Optional(
+                "eco_mode_end",
+                default=defaults.get("eco_mode_end"),
+            ): selector.TimeSelector(),
+        }
+    )
+
+
+def get_options_solar_control_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
+    """
+    Get schema for solar-based optimized mode configuration.
+
+    This schema is shown when use_solar_control is enabled and collects:
+    - Sun entity selector
+    - Sun angle above horizon (0-80 degrees)
+
+    Args:
+        defaults: Optional dictionary of current option values.
+
+    Returns:
+        Voluptuous schema for solar control configuration.
+
+    """
+    defaults = defaults or {}
+
+    return vol.Schema(
+        {
+            vol.Optional(
+                "sun_entity_id",
+                default=defaults.get("sun_entity_id"),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sun"],
+                ),
+            ),
+            vol.Optional(
+                "sun_angle",
+                default=defaults.get("sun_angle", DEFAULT_SUN_ANGLE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=80,
+                    step=1,
+                    unit_of_measurement="°",
+                    mode=selector.NumberSelectorMode.SLIDER,
                 ),
             ),
         }
@@ -248,7 +338,10 @@ def get_options_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
 
 __all__ = [
     "get_options_advanced_schema",
+    "get_options_battery_schema",
     "get_options_optional_schema",
     "get_options_required_schema",
     "get_options_schema",
+    "get_options_solar_control_schema",
+    "get_options_time_based_schema",
 ]

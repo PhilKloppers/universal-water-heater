@@ -89,6 +89,24 @@ Configure advanced features after initial setup by clicking **Configure**:
 
 The heater will automatically turn off when your battery drops below the stop threshold and only resume when it charges above the resume threshold. This prevents battery drain during low-charge situations while avoiding rapid on/off cycling.
 
+**Optimised Mode Scheduling:**
+
+Optimised mode allows intelligent heating based on time of day or solar generation:
+
+- **Time-Based Control:** Heat to normal temperature during specific hours, eco temperature or OFF outside those times
+  - Configure two time ranges: Normal mode hours and Eco mode hours
+  - Times use your Home Assistant timezone (configured in `configuration.yaml`)
+  - Outside both ranges, heater turns OFF completely to save energy
+  - Perfect for heating during cheap electricity hours or avoiding load shedding times
+
+- **Solar-Based Control:** Heat based on sun elevation angle
+  - Normal temperature when sun is above configured angle (0-80°)
+  - Eco temperature when sun is below threshold
+  - Ideal for homes with solar panels - heat when sun is generating power
+  - Requires Home Assistant sun entity (automatically created)
+
+Both strategies work alongside battery-aware mode for maximum efficiency.
+
 ## What Gets Created
 
 After successful setup, the integration creates:
@@ -105,6 +123,7 @@ After successful setup, the integration creates:
 The integration creates the following entity types:
 
 #### Sensors
+
 - **Water Temperature** - Current water temperature (linked to source entity)
 - **Power Consumption** - Current power usage (linked to source entity, optional)
 - **Voltage** - Current voltage (linked to source entity, optional)
@@ -112,12 +131,15 @@ The integration creates the following entity types:
 - **Status** - Device status with configuration details as attributes
 
 #### Binary Sensors
-- **API Connectivity** - Status of integration connectivity
+
+Currently no binary sensors are implemented.
 
 #### Switches
+
 - **Heater Switch** - Mirror and control the heater (linked to source entity, bidirectional)
 
 #### Select
+
 - **Mode** - Operating mode selection (Normal, Optimised, Eco, Off)
 
 ## First Steps

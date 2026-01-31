@@ -23,9 +23,13 @@ from __future__ import annotations
 
 from custom_components.universal_water_heater.config_flow_handler.validators.credentials import validate_device_name
 from custom_components.universal_water_heater.config_flow_handler.validators.sanitizers import sanitize_username
+from custom_components.universal_water_heater.config_flow_handler.validators.time_range import (
+    validate_time_ranges_no_overlap,
+)
 
 # Re-export all validators for convenient imports
 __all__ = [
     "sanitize_username",
     "validate_device_name",
+    "validate_time_ranges_no_overlap",
 ]

@@ -23,9 +23,6 @@ custom_components/universal_water_heater/
 ├── manifest.json            # Integration metadata
 ├── repairs.py               # Repair flows for fixing issues
 ├── services.yaml            # Service action definitions (legacy filename)
-├── api/                     # External API communication
-│   ├── __init__.py
-│   └── client.py            # API client implementation
 ├── config_flow_handler/     # Config flow implementation
 │   ├── __init__.py          # Package exports
 │   ├── handler.py           # Backward compatibility wrapper
@@ -58,8 +55,8 @@ custom_components/universal_water_heater/
 
 **Directory:** `coordinator/`
 
-The coordinator package manages periodic data fetching from the external API and distributes
-updates to all entities. It is organized as a package with separate modules for different concerns:
+The coordinator package manages real-time entity monitoring and control logic execution.
+It is organized as a package with separate modules for different concerns:
 
 **Package structure:**
 
@@ -95,17 +92,19 @@ The coordinator is structured as a package rather than a single file to support 
 - **Maintainability**: Individual modules stay focused and manageable (<400 lines)
 - **Testability**: Each module can be tested independently
 
-### API Client
+### Control Logic
 
-**Directory:** `api/`
+**Module:** `utils/control_logic.py`
 
-Handles all communication with external APIs or devices. Implements:
+Implements intelligent water heating control with multiple operating modes:
 
-- Async HTTP requests using `aiohttp`
-- Connection management and timeouts
-- Error translation to custom exceptions
+- Temperature-based hysteresis control to prevent rapid cycling
+- Battery-aware heating with configurable thresholds
+- Optimised mode with time-based or solar-based scheduling
+- Timezone-aware time range checking
+- Integration with Home Assistant's sun entity for solar control
 
-**Key class:** `UniversalWaterHeaterApiClient`
+**Key class:** `WaterHeaterControlLogic`
 
 ### Config Flow
 

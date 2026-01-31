@@ -30,6 +30,8 @@ from custom_components.universal_water_heater.config_flow_handler.schemas.option
     get_options_optional_schema,
     get_options_required_schema,
     get_options_schema,
+    get_options_solar_control_schema,
+    get_options_time_based_schema,
 )
 
 # Re-export all schemas for convenient imports
@@ -40,6 +42,8 @@ __all__ = [
     "get_options_optional_schema",
     "get_options_required_schema",
     "get_options_schema",
+    "get_options_solar_control_schema",
+    "get_options_time_based_schema",
     "get_reconfigure_schema",
     "get_user_schema",
 ]

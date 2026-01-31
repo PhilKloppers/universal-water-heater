@@ -36,3 +36,16 @@ DEFAULT_NORMAL_TEMPERATURE = 65.0
 DEFAULT_ECO_TEMPERATURE = 55.0
 DEFAULT_MAX_TEMPERATURE = 75.0
 DEFAULT_HYSTERESIS = 4.0
+
+# Optimized mode configuration keys
+CONF_USE_SOLAR_CONTROL = "use_solar_control"
+CONF_NORMAL_MODE_START = "normal_mode_start"
+CONF_NORMAL_MODE_END = "normal_mode_end"
+CONF_ECO_MODE_START = "eco_mode_start"
+CONF_ECO_MODE_END = "eco_mode_end"
+CONF_SUN_ENTITY_ID = "sun_entity_id"
+CONF_SUN_ANGLE = "sun_angle"
+
+# Optimized mode defaults
+DEFAULT_USE_SOLAR_CONTROL = False
+DEFAULT_SUN_ANGLE = 0

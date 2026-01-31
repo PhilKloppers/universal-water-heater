@@ -18,7 +18,10 @@ from custom_components.universal_water_heater.config_flow_handler.schemas import
     get_options_battery_schema,
     get_options_optional_schema,
     get_options_required_schema,
+    get_options_solar_control_schema,
+    get_options_time_based_schema,
 )
+from custom_components.universal_water_heater.config_flow_handler.validators import validate_time_ranges_no_overlap
 from homeassistant import config_entries
 from homeassistant.helpers import entity_registry as er
 
@@ -78,12 +81,13 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """
-        Handle advanced options (step 2 of 4 or 3).
+        Handle advanced options (step 2 of 5 or 4).
 
         This step collects advanced configuration:
         - Enable debugging
         - Custom icon
         - Battery-aware option
+        - Solar control toggle (for optimized mode)
 
         Args:
             user_input: The user input from the options form, or None for initial display.
@@ -100,8 +104,10 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
             if user_input.get("battery_aware", False):
                 return await self.async_step_battery()
 
-            # Otherwise proceed directly to optional sensors
-            return await self.async_step_optional()
+            # Otherwise route to time-based or solar control configuration
+            if user_input.get("use_solar_control", False):
+                return await self.async_step_solar()
+            return await self.async_step_time_based()
 
         return self.async_show_form(
             step_id="advanced",
@@ -138,14 +144,88 @@ class UniversalWaterHeaterOptionsFlow(config_entries.OptionsFlow):
                 errors["battery_resume_threshold"] = "resume_threshold_too_low"
 
             if not errors:
-                # Store battery options and proceed to optional sensors
+                # Store battery options
                 self._options.update(user_input)
-                return await self.async_step_optional()
+
+                # Route to time-based or solar control configuration
+                if self._options.get("use_solar_control", False):
+                    return await self.async_step_solar()
+                return await self.async_step_time_based()
 
         return self.async_show_form(
             step_id="battery",
             data_schema=get_options_battery_schema(self.config_entry.options),
             errors=errors,
+        )
+
+    async def async_step_time_based(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle time-based control configuration during options flow (step 4 of 5).
+
+        This step collects time-based control settings:
+        - Normal mode start time
+        - Normal mode end time
+        - Eco mode start time
+        - Eco mode end time
+
+        Args:
+            user_input: The user input from the form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or proceeding to next step.
+
+        """
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            # Validate time ranges don't overlap
+            if not validate_time_ranges_no_overlap(
+                str(user_input["normal_mode_start"]),
+                str(user_input["normal_mode_end"]),
+                str(user_input["eco_mode_start"]),
+                str(user_input["eco_mode_end"]),
+            ):
+                errors["base"] = "time_ranges_overlap"
+            else:
+                # Store time-based options and proceed to optional sensors
+                self._options.update(user_input)
+                return await self.async_step_optional()
+
+        return self.async_show_form(
+            step_id="time_based",
+            data_schema=get_options_time_based_schema(self.config_entry.options),
+            errors=errors,
+        )
+
+    async def async_step_solar(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle solar control configuration during options flow (step 4 of 5).
+
+        This step collects solar control settings:
+        - Sun entity selector
+        - Sun angle above horizon
+
+        Args:
+            user_input: The user input from the form, or None for initial display.
+
+        Returns:
+            The config flow result, either showing a form or proceeding to next step.
+
+        """
+        if user_input is not None:
+            # Store solar control options and proceed to optional sensors
+            self._options.update(user_input)
+            return await self.async_step_optional()
+
+        return self.async_show_form(
+            step_id="solar",
+            data_schema=get_options_solar_control_schema(self.config_entry.options),
         )
 
     async def async_step_optional(

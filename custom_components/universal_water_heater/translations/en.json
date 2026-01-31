@@ -52,11 +52,43 @@
         "description": "Configure advanced options for debugging and customization.",
         "data": {
           "enable_debugging": "Enable debug logging",
-          "custom_icon": "Custom icon (optional)"
+          "custom_icon": "Custom icon (optional)",
+          "battery_aware": "Battery-aware heating",
+          "use_solar_control": "Optimised mode"
         },
         "data_description": {
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
-          "custom_icon": "Override the default icon for entities (optional, leave blank for default)"
+          "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
+          "battery_aware": "Pause heating when battery state of charge is low",
+          "use_solar_control": "Enable solar control (on) for optimised mode, or use time-based control (off, default) for scheduled operation"
+        }
+      },
+      "configure_time_based": {
+        "title": "Time-Based Control",
+        "description": "Configure time-based control for optimised heating mode.",
+        "data": {
+          "normal_mode_start": "Normal mode start",
+          "normal_mode_end": "Normal mode end",
+          "eco_mode_start": "Eco mode start",
+          "eco_mode_end": "Eco mode end"
+        },
+        "data_description": {
+          "normal_mode_start": "Time to start Normal mode heating",
+          "normal_mode_end": "Time to end Normal mode heating",
+          "eco_mode_start": "Time to start Eco mode heating",
+          "eco_mode_end": "Time to end Eco mode heating"
+        }
+      },
+      "configure_solar": {
+        "title": "Solar Control",
+        "description": "Configure solar-based control for optimised heating mode.",
+        "data": {
+          "sun_entity_id": "Sun entity",
+          "sun_angle": "Sun angle above horizon"
+        },
+        "data_description": {
+          "sun_entity_id": "Select the sun entity to track solar position",
+          "sun_angle": "Minimum angle above horizon (in degrees) for optimised mode activation"
         }
       },
       "configure_optional": {
@@ -77,7 +109,8 @@
     "error": {
       "connection": "Unable to connect to the server.",
       "unknown": "Unknown error occurred.",
-      "invalid_device_name": "Invalid device name. Please provide a valid name."
+      "invalid_device_name": "Invalid device name. Please provide a valid name.",
+      "time_ranges_overlap": "Normal and Eco time ranges cannot overlap. Please adjust your start and end times."
     },
     "abort": {
       "already_configured": "This entry is already configured."
@@ -103,12 +136,14 @@
         "data": {
           "enable_debugging": "Enable debug logging",
           "custom_icon": "Custom icon (optional)",
-          "battery_aware": "Battery-aware heating"
+          "battery_aware": "Battery-aware heating",
+          "use_solar_control": "Optimised mode"
         },
         "data_description": {
           "enable_debugging": "Enable detailed debug logging for troubleshooting",
           "custom_icon": "Override the default icon for entities (optional, leave blank for default)",
-          "battery_aware": "Pause heating when battery state of charge is low"
+          "battery_aware": "Pause heating when battery state of charge is low",
+          "use_solar_control": "Enable solar control (on) for optimised mode, or use time-based control (off, default) for scheduled operation"
         }
       },
       "battery": {
@@ -141,7 +176,8 @@
       }
     },
     "error": {
-      "resume_threshold_too_low": "Resume threshold must be higher than stop threshold"
+      "resume_threshold_too_low": "Resume threshold must be higher than stop threshold",
+      "time_ranges_overlap": "Normal and Eco time ranges cannot overlap. Please adjust your start and end times."
     },
     "abort": {
       "reconfigure_successful": "Configuration updated successfully"

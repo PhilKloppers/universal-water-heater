@@ -56,6 +56,62 @@ The integration monitors battery SoC in real-time, responding to every 0.1% chan
 
 This hysteresis prevents rapid on/off cycling around a single threshold.
 
+#### Optimised Mode Scheduling
+
+Optimised mode provides intelligent heating control based on time of day or solar generation:
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| **Use Solar Control** | boolean | No | False | Choose between solar-based (True) or time-based (False) control |
+
+**Time-Based Control (when Use Solar Control = False):**
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| **Normal Mode Start** | time | No | - | Start time for normal temperature heating |
+| **Normal Mode End** | time | No | - | End time for normal temperature heating |
+| **Eco Mode Start** | time | No | - | Start time for eco temperature heating |
+| **Eco Mode End** | time | No | - | End time for eco temperature heating |
+
+**Solar-Based Control (when Use Solar Control = True):**
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| **Sun Entity ID** | entity_id | No | - | Sun entity (automatically created by Home Assistant) |
+| **Sun Angle** | float | No | 0 | Sun elevation threshold in degrees (0-80°) |
+
+**How Optimised Mode Works:**
+
+When you select Optimised mode, the integration uses your chosen strategy to determine target temperature:
+
+- **Time-Based Strategy:**
+  - During Normal mode hours: Heats to normal temperature
+  - During Eco mode hours: Heats to eco temperature
+  - Outside both ranges: Turns heater OFF completely (saves maximum energy)
+  - All times use your Home Assistant timezone
+  - Time ranges are validated to prevent overlaps
+  - Supports midnight-crossing ranges (e.g., 22:00-06:00)
+
+- **Solar-Based Strategy:**
+  - Sun elevation > threshold: Heats to normal temperature (sun is generating power)
+  - Sun elevation < threshold: Heats to eco temperature
+  - Ideal for solar panel systems - heat when excess power is available
+  - Angle threshold adjustable from 0° (horizon) to 80° (high sun)
+
+**Example Time-Based Schedule:**
+
+- Normal mode: 06:00-08:00 (morning heating for showers)
+- Eco mode: 17:00-19:00 (evening preparation)
+- Rest of day: OFF (heater completely disabled)
+
+**Example Solar-Based:**
+
+- Sun angle threshold: 45°
+- Sun above 45°: Normal temp (strong solar generation)
+- Sun below 45°: Eco temp (reduced generation)
+
+Both strategies work alongside battery-aware mode - if battery drops below threshold, heater turns off regardless of schedule.
+
 #### Debug Settings
 
 | Option | Type | Required | Default | Description |
@@ -155,6 +211,12 @@ The status sensor provides the following attributes:
 - `hysteresis`: Temperature differential for control logic
 - `battery_threshold`: Stop heating threshold (if battery-aware enabled)
 - `battery_resume_threshold`: Resume heating threshold (if battery-aware enabled)
+- `optimised_control_type`: "time_based" or "solar" (if optimised mode configured)
+- `normal_mode_start`: Start time for normal mode heating (if time-based control)
+- `normal_mode_end`: End time for normal mode heating (if time-based control)
+- `eco_mode_start`: Start time for eco mode heating (if time-based control)
+- `eco_mode_end`: End time for eco mode heating (if time-based control)
+- `sun_angle`: Sun elevation threshold in degrees (if solar control)
 
 **Real-Time Monitoring:**
 
@@ -310,8 +372,8 @@ Diagnostic data includes:
 
 - Connection status
 - Last update timestamp
-- API response data
 - Entity states
+- Configuration settings
 - Error history
 
 **Privacy note:** Diagnostic data may contain sensitive information. Review before sharing.
