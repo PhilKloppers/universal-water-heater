@@ -79,6 +79,20 @@
           "eco_mode_end": "Time to end Eco mode heating"
         }
       },
+      "configure_battery": {
+        "title": "Battery Configuration",
+        "description": "Configure battery-aware heating thresholds.",
+        "data": {
+          "battery_threshold": "Stop heating below",
+          "battery_resume_threshold": "Resume heating above",
+          "battery_soc_entity_id": "Battery SoC Entity"
+        },
+        "data_description": {
+          "battery_threshold": "Turn off heater when battery SoC drops below this percentage",
+          "battery_resume_threshold": "Resume heating when battery SoC rises above this percentage (must be higher than stop threshold)",
+          "battery_soc_entity_id": "Select the battery state of charge sensor entity"
+        }
+      },
       "configure_solar": {
         "title": "Solar Control",
         "description": "Configure solar-based control for optimised heating mode.",
@@ -158,6 +172,34 @@
           "battery_threshold": "Turn off heater when battery SoC drops below this percentage",
           "battery_resume_threshold": "Resume heating when battery SoC rises above this percentage (must be higher than stop threshold)",
           "battery_soc_entity_id": "Select the battery state of charge sensor entity"
+        }
+      },
+      "time_based": {
+        "title": "Time-Based Control",
+        "description": "Configure time-based control for optimised heating mode.",
+        "data": {
+          "normal_mode_start": "Normal mode start",
+          "normal_mode_end": "Normal mode end",
+          "eco_mode_start": "Eco mode start",
+          "eco_mode_end": "Eco mode end"
+        },
+        "data_description": {
+          "normal_mode_start": "Time to start Normal mode heating",
+          "normal_mode_end": "Time to end Normal mode heating",
+          "eco_mode_start": "Time to start Eco mode heating",
+          "eco_mode_end": "Time to end Eco mode heating"
+        }
+      },
+      "solar": {
+        "title": "Solar Control",
+        "description": "Configure solar-based control for optimised heating mode.",
+        "data": {
+          "sun_entity_id": "Sun entity",
+          "sun_angle": "Sun angle above horizon"
+        },
+        "data_description": {
+          "sun_entity_id": "Select the sun entity to track solar position",
+          "sun_angle": "Minimum angle above horizon (in degrees) for optimised mode activation"
         }
       },
       "optional": {
